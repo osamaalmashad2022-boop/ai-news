@@ -110,7 +110,7 @@ ${art.contentSnippet.slice(0, 1000)}
   };
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-3.6-flash',
     contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميعها وتلخيص أهم 10 إلى 15 خبر وتصدير النتائج باللغة العربية:\n\n${articlesPrompt}`,
     config: {
       systemInstruction: SYSTEM_PROMPT,
