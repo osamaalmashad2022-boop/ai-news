@@ -1,5 +1,5 @@
 import Parser from 'rss-parser';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { RSS_FEEDS } from './feeds.mjs';
@@ -84,28 +84,30 @@ ${art.contentSnippet.slice(0, 1000)}
 
   console.log('🤖 جاري إرسال المقالات إلى Gemini 2.5 Flash للتلخيص والتدقيق بالعربية...');
 
-  const newsItemSchema = Type.OBJECT({
+  const newsItemSchema = {
+    type: 'object',
     properties: {
-      title: Type.STRING({ description: 'عنوان صحفي جذاب ومختصر باللغة العربية' }),
-      summary: Type.STRING({ description: 'ملخص للخبر من 2 إلى 4 جمل باللغة العربية' }),
-      bodyMarkdown: Type.STRING({ description: 'تفاصيل الخبر بتنسيق ماركداون مقسم بنقاط وعناوين جانبية فرعية' }),
-      category: Type.STRING({ description: 'التصنيف الأساسي للخبر' }),
-      tags: Type.ARRAY({ items: Type.STRING(), description: 'وسوم الكلمات المفتاحية باللغة الإنجليزية والعربية' }),
-      sourceName: Type.STRING({ description: 'اسم المصدر الأصلي' }),
-      sourceUrl: Type.STRING({ description: 'رابط المقال الأصلي' }),
-      publishedAt: Type.STRING({ description: 'تاريخ النشر بصيغة ISO' }),
-      importance: Type.INTEGER({ description: 'معدل الأهمية من 1 إلى 5' }),
-      toolsMentioned: Type.ARRAY({ items: Type.STRING(), description: 'أسماء أي أدوات جديدة مذكورة' }),
+      title: { type: 'string', description: 'عنوان صحفي جذاب ومختصر باللغة العربية' },
+      summary: { type: 'string', description: 'ملخص للخبر من 2 إلى 4 جمل باللغة العربية' },
+      bodyMarkdown: { type: 'string', description: 'تفاصيل الخبر بتنسيق ماركداون مقسم بنقاط وعناوين جانبية فرعية' },
+      category: { type: 'string', description: 'التصنيف الأساسي للخبر' },
+      tags: { type: 'array', items: { type: 'string' }, description: 'وسوم الكلمات المفتاحية باللغة الإنجليزية والعربية' },
+      sourceName: { type: 'string', description: 'اسم المصدر الأصلي' },
+      sourceUrl: { type: 'string', description: 'رابط المقال الأصلي' },
+      publishedAt: { type: 'string', description: 'تاريخ النشر بصيغة ISO' },
+      importance: { type: 'integer', description: 'معدل الأهمية من 1 إلى 5' },
+      toolsMentioned: { type: 'array', items: { type: 'string' }, description: 'أسماء أي أدوات جديدة مذكورة' },
     },
     required: ['title', 'summary', 'bodyMarkdown', 'category', 'tags', 'sourceName', 'sourceUrl', 'publishedAt', 'importance'],
-  });
+  };
 
-  const responseSchema = Type.OBJECT({
+  const responseSchema = {
+    type: 'object',
     properties: {
-      news: Type.ARRAY({ items: newsItemSchema }),
+      news: { type: 'array', items: newsItemSchema },
     },
     required: ['news'],
-  });
+  };
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
