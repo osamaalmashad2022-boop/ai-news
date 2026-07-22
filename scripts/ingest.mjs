@@ -16,11 +16,11 @@ function sanitizeSlug(text) {
     .toLowerCase()
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '') || `news-${Date.now()}`;
+    .replace(/^-+|-+$/g, '') || `item-${Date.now()}`;
 }
 
 async function fetchRecentArticles() {
-  console.log('📡 جاري قراءة خلاصات RSS...');
+  console.log('📡 جاري قراءة خلاصات RSS وسحب الأخبار والأدوات...');
   const now = new Date();
   const yesterday = new Date(now.getTime() - 48 * 60 * 60 * 1000); // last 48 hours for buffer
   const items = [];
@@ -48,26 +48,39 @@ async function fetchRecentArticles() {
     }
   }
 
-  console.log(`✅ تم جمع ${items.length} مقال حديث.`);
+  console.log(`✅ تم جمع ${items.length} مقال حديث من الخلاصات.`);
   return items;
 }
 
 async function summarizeWithGemini(articles) {
+  if (!process.env.GEMINI_API_KEY) {
+    try {
+      const envContent = await fs.readFile(path.join(process.cwd(), '.env'), 'utf-8');
+      const match = envContent.match(/GEMINI_API_KEY=(.+)/);
+      if (match && match[1]) {
+        process.env.GEMINI_API_KEY = match[1].trim();
+      }
+    } catch {}
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.warn('⚠️ لم يتم العثور على GEMINI_API_KEY. سيتم استخدام وضع التجربة المحاكاة (Mocking).');
-    return articles.slice(0, 3).map((art, idx) => ({
-      title: `ملخص: ${art.title}`,
-      summary: art.contentSnippet.slice(0, 250) + '...',
-      bodyMarkdown: `تم جلب هذا الخبر من **${art.sourceName}**.\n\n### التفاصيل:\n${art.contentSnippet.slice(0, 500)}`,
-      category: art.defaultCategory,
-      tags: ['AI', art.sourceName],
-      sourceName: art.sourceName,
-      sourceUrl: art.link,
-      publishedAt: art.pubDate,
-      importance: 4,
-      toolsMentioned: [],
-    }));
+    return {
+      news: articles.slice(0, 3).map((art) => ({
+        title: `ملخص: ${art.title}`,
+        summary: art.contentSnippet.slice(0, 250) + '...',
+        bodyMarkdown: `تم جلب هذا الخبر من **${art.sourceName}**.\n\n### التفاصيل:\n${art.contentSnippet.slice(0, 500)}`,
+        category: art.defaultCategory,
+        tags: ['AI', art.sourceName],
+        sourceName: art.sourceName,
+        sourceUrl: art.link,
+        publishedAt: art.pubDate,
+        importance: 4,
+        toolsMentioned: [],
+      })),
+      tools: [],
+    };
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -79,10 +92,10 @@ async function summarizeWithGemini(articles) {
 الرابط: ${art.link}
 تاريخ النشر: ${art.pubDate}
 النص/المقتطف:
-${art.contentSnippet.slice(0, 1000)}
+${art.contentSnippet.slice(0, 2000)}
 `).join('\n');
 
-  console.log('🤖 جاري إرسال المقالات إلى Gemini 2.5 Flash للتلخيص والتدقيق بالعربية...');
+  console.log('🤖 جاري تحليل المقالات عبر Gemini 3.6 Flash لاستخراج الأخبار والأدوات الجديدة بالعربية...');
 
   const newsItemSchema = {
     type: 'object',
@@ -101,17 +114,31 @@ ${art.contentSnippet.slice(0, 1000)}
     required: ['title', 'summary', 'bodyMarkdown', 'category', 'tags', 'sourceName', 'sourceUrl', 'publishedAt', 'importance'],
   };
 
+  const toolItemSchema = {
+    type: 'object',
+    properties: {
+      name: { type: 'string', description: 'اسم الأداة أو التطبيق' },
+      description: { type: 'string', description: 'وصف باللغة العربية للأداة وتطبيقاتها' },
+      category: { type: 'string', description: 'التصنيف الأساسي للأداة' },
+      url: { type: 'string', description: 'الرابط الرسمي للأداة أو رابط المقال' },
+      pricing: { type: 'string', description: 'نوع التسعير: free أو freemium أو paid' },
+      tags: { type: 'array', items: { type: 'string' }, description: 'وسوم الكلمات المفتاحية' },
+    },
+    required: ['name', 'description', 'category', 'url', 'pricing', 'tags'],
+  };
+
   const responseSchema = {
     type: 'object',
     properties: {
       news: { type: 'array', items: newsItemSchema },
+      tools: { type: 'array', items: toolItemSchema },
     },
-    required: ['news'],
+    required: ['news', 'tools'],
   };
 
   const response = await ai.models.generateContent({
     model: 'gemini-3.6-flash',
-    contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميعها وتلخيص أهم 10 إلى 15 خبر وتصدير النتائج باللغة العربية:\n\n${articlesPrompt}`,
+    contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميع الأخبار البارزة واستخراج أي أدوات جديدة وتصدير النتائج باللغة العربية:\n\n${articlesPrompt}`,
     config: {
       systemInstruction: SYSTEM_PROMPT,
       responseMimeType: 'application/json',
@@ -122,7 +149,10 @@ ${art.contentSnippet.slice(0, 1000)}
 
   const rawJson = response.text;
   const parsed = JSON.parse(rawJson);
-  return parsed.news || [];
+  return {
+    news: parsed.news || [],
+    tools: parsed.tools || [],
+  };
 }
 
 async function main() {
@@ -134,16 +164,16 @@ async function main() {
       return;
     }
 
-    const newsList = await summarizeWithGemini(articles);
-    console.log(`✨ تم توليد ${newsList.length} خبر ملخص باحترافية.`);
+    const { news: newsList, tools: toolsList } = await summarizeWithGemini(articles);
+    console.log(`✨ تم توليد ${newsList.length} خبر ملخص و ${toolsList.length} أداة جديدة.`);
 
     if (isDryRun) {
       console.log('\n--- 🧪 وضع الاختيار والتجربة (--dry-run) ---');
-      console.log(JSON.stringify(newsList, null, 2));
+      console.log(JSON.stringify({ news: newsList, tools: toolsList }, null, 2));
       return;
     }
 
-    // Save Markdown files
+    // 1. Save News Markdown files
     const todayStr = new Date().toISOString().split('T')[0];
     const newsDir = path.join(process.cwd(), 'src', 'content', 'news', todayStr);
     await fs.mkdir(newsDir, { recursive: true });
@@ -168,10 +198,48 @@ ${item.bodyMarkdown}
 `;
 
       await fs.writeFile(filePath, frontmatter, 'utf-8');
-      console.log(`  💾 تم حفظ الخبر: ${filePath}`);
+      console.log(`  📰 تم حفظ الخبر: ${filePath}`);
     }
 
-    console.log('🎉 اكتملت عملية الجلب والتلخيص بنجاح!');
+    // 2. Save Tools Markdown files
+    const toolsDir = path.join(process.cwd(), 'src', 'content', 'tools');
+    await fs.mkdir(toolsDir, { recursive: true });
+
+    const validPricing = ['free', 'freemium', 'paid'];
+
+    for (const tool of toolsList) {
+      const slug = sanitizeSlug(tool.name);
+      const filePath = path.join(toolsDir, `${slug}.md`);
+
+      // Check if tool file already exists to prevent overwriting custom entries
+      try {
+        await fs.access(filePath);
+        console.log(`  ℹ️ الأداة موجودة مسبقاً، تم تخطي: ${slug}`);
+        continue;
+      } catch {
+        // File does not exist, write new tool
+      }
+
+      const pricing = validPricing.includes(tool.pricing?.toLowerCase()) ? tool.pricing.toLowerCase() : 'freemium';
+
+      const toolFrontmatter = `---
+name: ${JSON.stringify(tool.name)}
+description: ${JSON.stringify(tool.description)}
+category: ${JSON.stringify(tool.category || 'أدوات وتطبيقات')}
+url: ${JSON.stringify(tool.url || 'https://google.com')}
+pricing: ${JSON.stringify(pricing)}
+tags: ${JSON.stringify(tool.tags || [])}
+addedAt: ${JSON.stringify(new Date().toISOString())}
+---
+
+${tool.description}
+`;
+
+      await fs.writeFile(filePath, toolFrontmatter, 'utf-8');
+      console.log(`  🛠️ تم حفظ أداة جديدة: ${filePath}`);
+    }
+
+    console.log('🎉 اكتملت عملية الجلب والتلخيص وحفظ الأدوات بنجاح!');
   } catch (err) {
     console.error('❌ خطأ أثناء تنفيذ عملية الجلب والتلخيص:', err);
     process.exit(1);
