@@ -38,6 +38,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No new news articles to commit today."
           else
-            git commit -m "chore(news): auto-update daily AI news articles [skip ci]"
+            git commit -m "chore(news): auto-update daily AI news articles"
             git push
           fi
