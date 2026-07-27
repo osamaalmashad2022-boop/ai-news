@@ -1,7 +1,7 @@
 ---
 name: "FAIRChem v2 (UMA)"
 description: "إطار عمل ذكاء اصطناعي من معمل FAIR للمحاكاة الذرية والكيميائية عبر الجزيئات والمواد المختلفة."
-category: "أبحاث"
+category: "الأبحاث"
 url: "https://www.marktechpost.com/2026/07/26/fairchem-v2-uma-for-multidomain-atomistic-simulation-across-molecules-catalysts-materials-vibrations-and-molecular-dynamics/"
 pricing: "free"
 tags: ["FAIRChem","Meta AI","Chemistry","Simulation"]

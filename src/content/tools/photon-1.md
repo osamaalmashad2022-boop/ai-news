@@ -1,7 +1,7 @@
 ---
 name: "Photon-1"
 description: "نموذج تخيل ومحاكاة تأسيسي يعتمد على تقنية MoE بـ 106 مليار بارامتر لمحاكاة الفيزيائيات وسطح المكتب عبر أشرطة الفيديو المباشرة."
-category: "أبحاث"
+category: "الأبحاث"
 url: "https://www.marktechpost.com/2026/07/26/induction-labs-photon-1-simulates-desktops-plays-checkers-and-models-billiard-physics-from-one-pretraining-run/"
 pricing: "free"
 tags: ["Induction Labs","Photon-1","Simulation","MoE"]
