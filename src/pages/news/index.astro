@@ -6,6 +6,7 @@ import CategoryFilter from '../../components/CategoryFilter.astro';
 
 const allNews = await getCollection('news');
 const sortedNews = allNews.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+const INITIAL_COUNT = 12;
 ---
 
 <BaseLayout title="الأخبار اليومية - نبض الذكاء AI" description="الأرشيف الكامل لأخبار وتطورات الذكاء الاصطناعي اليومية ملخصة بالعربية">
@@ -16,17 +17,84 @@ const sortedNews = allNews.sort((a, b) => b.data.publishedAt.getTime() - a.data.
       </h1>
       <p class="text-gray-400 text-sm sm:text-base">
         متابعة لحظية وموثقة لأحدث الأخبار المستخلصة من كبرى الخلاصات العالمية
+        <span class="text-neon-cyan font-semibold">({sortedNews.length} خبر)</span>
       </p>
     </div>
 
-    <!-- Category Filter -->
-    <CategoryFilter activeCategory="الكل" />
+    <!-- Category Filter (Client-side) -->
+    <CategoryFilter activeCategory="الكل" target=".news-grid" />
 
     <!-- News Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+    <div class="news-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
       {sortedNews.map((newsItem, index) => (
-        <NewsCard news={newsItem} featured={index === 0} />
+        <div class:list={[index >= INITIAL_COUNT && 'hidden load-more-item']}>
+          <NewsCard news={newsItem} featured={index === 0} />
+        </div>
       ))}
     </div>
+
+    <!-- Load More Button -->
+    {sortedNews.length > INITIAL_COUNT && (
+      <div class="text-center pt-6">
+        <button
+          id="load-more-news"
+          type="button"
+          class="px-8 py-3.5 rounded-xl bg-dark-card/90 text-white font-semibold text-sm border border-dark-border hover:border-neon-cyan/40 hover:bg-dark-hover transition-all duration-300 hover:-translate-y-0.5 inline-flex items-center gap-2"
+          data-total={sortedNews.length}
+          data-loaded={INITIAL_COUNT}
+          data-step="12"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+          <span>تحميل المزيد</span>
+          <span class="text-xs text-gray-400" id="load-more-count">
+            ({sortedNews.length - INITIAL_COUNT} متبقي)
+          </span>
+        </button>
+      </div>
+    )}
   </div>
 </BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const loadMoreBtn = document.getElementById('load-more-news');
+    if (!loadMoreBtn) return;
+
+    loadMoreBtn.addEventListener('click', () => {
+      const step = parseInt(loadMoreBtn.getAttribute('data-step') || '12');
+      let loaded = parseInt(loadMoreBtn.getAttribute('data-loaded') || '12');
+      const total = parseInt(loadMoreBtn.getAttribute('data-total') || '0');
+
+      const hiddenItems = document.querySelectorAll('.load-more-item.hidden');
+      const toShow = Array.from(hiddenItems).slice(0, step);
+
+      toShow.forEach((item, i) => {
+        item.classList.remove('hidden');
+        const el = item as HTMLElement;
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, i * 50);
+      });
+
+      loaded += toShow.length;
+      loadMoreBtn.setAttribute('data-loaded', loaded.toString());
+
+      const remaining = total - loaded;
+      const countEl = document.getElementById('load-more-count');
+      if (countEl) {
+        countEl.textContent = `(${remaining} متبقي)`;
+      }
+
+      if (remaining <= 0) {
+        loadMoreBtn.style.display = 'none';
+      }
+    });
+  });
+</script>

@@ -9,7 +9,10 @@
     "preview": "astro preview",
     "astro": "astro",
     "ingest": "node scripts/ingest.mjs",
-    "ingest:dry": "node scripts/ingest.mjs --dry-run"
+    "ingest:dry": "node scripts/ingest.mjs --dry-run",
+    "validate": "node scripts/validate.mjs",
+    "cleanup": "node scripts/cleanup.mjs",
+    "cleanup:dry": "node scripts/cleanup.mjs --dry-run"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

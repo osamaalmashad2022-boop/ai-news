@@ -44,7 +44,7 @@ const featuredTools = sortedTools.slice(0, 3);
 
     <!-- News Grid -->
     {latestNews.length > 0 ? (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+      <div class="news-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
         {latestNews.map((newsItem, index) => (
           <NewsCard news={newsItem} featured={index === 0} />
         ))}

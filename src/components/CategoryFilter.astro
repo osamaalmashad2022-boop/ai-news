@@ -1,9 +1,10 @@
 ---
 interface Props {
   activeCategory?: string;
+  target?: string; // CSS selector of the grid container to filter
 }
 
-const { activeCategory = 'الكل' } = Astro.props;
+const { activeCategory = 'الكل', target = '.news-grid' } = Astro.props;
 
 const categories = [
   'الكل',
@@ -18,23 +19,85 @@ const categories = [
 ];
 ---
 
-<div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar py-4">
+<div class="category-filter flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar py-4" data-target={target}>
   {categories.map((category) => {
     const isAll = category === 'الكل';
     const isActive = activeCategory === category;
-    const href = isAll ? '/news' : `/category/${encodeURIComponent(category)}`;
 
     return (
-      <a
-        href={href}
-        class={`whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
+      <button
+        type="button"
+        data-category={category}
+        class={`category-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 cursor-pointer ${
           isActive
-            ? 'bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/40 shadow-sm shadow-neon-cyan/10'
+            ? 'bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/40 shadow-sm shadow-neon-cyan/10 active-filter'
             : 'bg-dark-card/60 text-gray-400 hover:text-white border border-dark-border/60 hover:bg-dark-hover'
         }`}
       >
         {category}
-      </a>
+      </button>
     );
   })}
 </div>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('.category-filter').forEach((filterBar) => {
+      const targetSelector = filterBar.getAttribute('data-target') || '.news-grid';
+      const buttons = filterBar.querySelectorAll('.category-btn');
+
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const category = btn.getAttribute('data-category');
+          const grid = document.querySelector(targetSelector);
+          if (!grid) return;
+
+          // Update active states
+          buttons.forEach((b) => {
+            b.classList.remove('bg-neon-cyan/20', 'text-neon-cyan', 'border-neon-cyan/40', 'shadow-sm', 'shadow-neon-cyan/10', 'active-filter');
+            b.classList.add('bg-dark-card/60', 'text-gray-400', 'border-dark-border/60');
+          });
+          btn.classList.remove('bg-dark-card/60', 'text-gray-400', 'border-dark-border/60');
+          btn.classList.add('bg-neon-cyan/20', 'text-neon-cyan', 'border-neon-cyan/40', 'shadow-sm', 'shadow-neon-cyan/10', 'active-filter');
+
+          // Filter cards
+          const cards = grid.querySelectorAll('[data-category]');
+          let visibleCount = 0;
+
+          cards.forEach((card) => {
+            const cardCategory = card.getAttribute('data-category');
+            const shouldShow = category === 'الكل' || cardCategory === category;
+
+            if (shouldShow) {
+              card.style.display = '';
+              card.style.opacity = '0';
+              card.style.transform = 'translateY(10px)';
+              requestAnimationFrame(() => {
+                card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+              });
+              visibleCount++;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+
+          // Show empty state if needed
+          let emptyState = grid.querySelector('.filter-empty-state');
+          if (visibleCount === 0) {
+            if (!emptyState) {
+              emptyState = document.createElement('div');
+              emptyState.className = 'filter-empty-state col-span-full glass-card p-12 text-center text-gray-400';
+              emptyState.textContent = 'لا توجد نتائج في هذا التصنيف';
+              grid.appendChild(emptyState);
+            }
+            emptyState.style.display = '';
+          } else if (emptyState) {
+            emptyState.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>

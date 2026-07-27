@@ -1,63 +1,239 @@
+/**
+ * ingest.mjs — نظام جلب وتحليل الأخبار والأدوات المحسّن
+ * ✅ Validation صارم للتصنيفات ضد enum
+ * ✅ Article-extractor للنص الكامل
+ * ✅ Deduplication عبر history.json
+ * ✅ Retry مع exponential backoff
+ * ✅ Structured logging إلى ملفات JSON
+ * ✅ Slug generation محسّن للعربية
+ */
+
 import Parser from 'rss-parser';
+import { extract } from '@extractus/article-extractor';
 import { GoogleGenAI } from '@google/genai';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { RSS_FEEDS } from './feeds.mjs';
+import { RSS_FEEDS, CATEGORIES } from './feeds.mjs';
 import { SYSTEM_PROMPT } from './prompt.mjs';
 
+// ─── Configuration ───────────────────────────────────────────────
 const isDryRun = process.argv.includes('--dry-run');
+const MAX_RETRIES = 3;
+const RETRY_BASE_DELAY_MS = 1000;
+const HISTORY_PATH = path.join(process.cwd(), 'scripts', 'history.json');
+const LOGS_DIR = path.join(process.cwd(), 'logs');
+const VALID_PRICING = ['free', 'freemium', 'paid'];
+const LOOKBACK_HOURS = 48;
+
 const parser = new Parser({
-  timeout: 10000,
-  headers: { 'User-Agent': 'AINewsArabic/1.0' },
+  timeout: 15000,
+  headers: { 'User-Agent': 'AINewsArabic/2.0 (automated; +https://ai-news-arabic.vercel.app)' },
 });
 
+// ─── Logger ──────────────────────────────────────────────────────
+const logEntries = [];
+const startTime = Date.now();
+
+function log(level, message, meta = {}) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    level,
+    message,
+    ...meta,
+  };
+  logEntries.push(entry);
+
+  const icons = { info: 'ℹ️', success: '✅', warn: '⚠️', error: '❌', step: '📡' };
+  console.log(`${icons[level] || '•'} ${message}`);
+}
+
+async function saveLog() {
+  try {
+    await fs.mkdir(LOGS_DIR, { recursive: true });
+    const todayStr = new Date().toISOString().split('T')[0];
+    const logFile = path.join(LOGS_DIR, `ingest-${todayStr}.json`);
+
+    const report = {
+      runAt: new Date().toISOString(),
+      durationMs: Date.now() - startTime,
+      dryRun: isDryRun,
+      entries: logEntries,
+    };
+
+    await fs.writeFile(logFile, JSON.stringify(report, null, 2), 'utf-8');
+    console.log(`📋 تم حفظ سجل التشغيل: ${logFile}`);
+  } catch (err) {
+    console.warn(`⚠️ تعذر حفظ السجل: ${err.message}`);
+  }
+}
+
+// ─── History / Deduplication ─────────────────────────────────────
+async function loadHistory() {
+  try {
+    const raw = await fs.readFile(HISTORY_PATH, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return { processedUrls: [], processedTitles: [], lastRunAt: null };
+  }
+}
+
+async function saveHistory(history) {
+  // Keep only last 2000 entries to avoid unbounded growth
+  history.processedUrls = history.processedUrls.slice(-2000);
+  history.processedTitles = history.processedTitles.slice(-2000);
+  history.lastRunAt = new Date().toISOString();
+  await fs.writeFile(HISTORY_PATH, JSON.stringify(history, null, 2), 'utf-8');
+}
+
+function normalizeTitle(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s\u0600-\u06FF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isDuplicate(history, url, title) {
+  if (history.processedUrls.includes(url)) return true;
+  const normalized = normalizeTitle(title);
+  return history.processedTitles.some(
+    (t) => normalizeTitle(t) === normalized
+  );
+}
+
+// ─── Retry Helper ────────────────────────────────────────────────
+async function withRetry(fn, label, retries = MAX_RETRIES) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === retries) {
+        log('error', `فشل ${label} بعد ${retries} محاولات: ${err.message}`);
+        throw err;
+      }
+      const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1);
+      log('warn', `محاولة ${attempt}/${retries} فشلت لـ ${label}، إعادة بعد ${delay}ms`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+}
+
+// ─── Slug Generation (Arabic-aware) ─────────────────────────────
 function sanitizeSlug(text) {
   return text
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '') || `item-${Date.now()}`;
+    // Transliterate common Arabic chars to latin for URL-safety
+    .replace(/[\u0600-\u06FF]+/g, (match) => {
+      // Use a hash-like approach: take first+last char codes
+      return `ar${match.charCodeAt(0).toString(36)}${match.charCodeAt(match.length - 1).toString(36)}`;
+    })
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || `item-${Date.now()}`;
 }
 
-async function fetchRecentArticles() {
-  console.log('📡 جاري قراءة خلاصات RSS وسحب الأخبار والأدوات...');
-  const now = new Date();
-  const yesterday = new Date(now.getTime() - 48 * 60 * 60 * 1000); // last 48 hours for buffer
-  const items = [];
+// ─── Category Validation ─────────────────────────────────────────
+function validateCategory(category, fallback) {
+  if (CATEGORIES.includes(category)) return category;
 
-  for (const feed of RSS_FEEDS) {
-    try {
-      console.log(`  🔍 فحص: ${feed.name}`);
-      const data = await parser.parseURL(feed.url);
-      
-      for (const entry of data.items || []) {
-        const pubDate = entry.pubDate ? new Date(entry.pubDate) : new Date();
-        if (pubDate >= yesterday) {
-          items.push({
-            title: entry.title || '',
-            contentSnippet: entry.contentSnippet || entry.content || '',
-            link: entry.link || feed.url,
-            pubDate: pubDate.toISOString(),
-            sourceName: feed.name,
-            defaultCategory: feed.categoryDefault,
-          });
-        }
-      }
-    } catch (err) {
-      console.warn(`  ⚠️ متعذر قراءة ${feed.name}: ${err.message}`);
+  // Try fuzzy match: find closest category
+  const normalized = category?.trim();
+  for (const valid of CATEGORIES) {
+    if (valid.includes(normalized) || normalized?.includes(valid)) {
+      return valid;
     }
   }
 
-  console.log(`✅ تم جمع ${items.length} مقال حديث من الخلاصات.`);
+  log('warn', `تصنيف غير صالح: "${category}" → استخدام الافتراضي: "${fallback}"`);
+  return fallback || 'أدوات وتطبيقات';
+}
+
+// ─── Full Text Extraction ────────────────────────────────────────
+async function extractFullText(url) {
+  try {
+    const article = await extract(url, {
+      timeout: 10000,
+      headers: { 'User-Agent': 'AINewsArabic/2.0' },
+    });
+    if (article?.content) {
+      // Strip HTML tags, keep text
+      const text = article.content
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return text.slice(0, 5000); // Gemini-friendly limit
+    }
+  } catch {
+    // Silently fall back to snippet
+  }
+  return null;
+}
+
+// ─── Fetch Recent Articles ───────────────────────────────────────
+async function fetchRecentArticles(history) {
+  log('step', 'جاري قراءة خلاصات RSS وسحب الأخبار والأدوات...');
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - LOOKBACK_HOURS * 60 * 60 * 1000);
+  const items = [];
+  let feedsSucceeded = 0;
+  let feedsFailed = 0;
+
+  for (const feed of RSS_FEEDS) {
+    try {
+      const data = await withRetry(
+        () => parser.parseURL(feed.url),
+        feed.name,
+        2
+      );
+
+      let feedCount = 0;
+      for (const entry of data.items || []) {
+        const pubDate = entry.pubDate ? new Date(entry.pubDate) : new Date();
+        if (pubDate < cutoff) continue;
+
+        const link = entry.link || feed.url;
+        const title = entry.title || '';
+
+        // Skip duplicates
+        if (isDuplicate(history, link, title)) {
+          continue;
+        }
+
+        // Try full text extraction
+        let fullText = await extractFullText(link);
+
+        items.push({
+          title,
+          contentSnippet: fullText || entry.contentSnippet || entry.content || '',
+          link,
+          pubDate: pubDate.toISOString(),
+          sourceName: feed.name,
+          defaultCategory: feed.categoryDefault,
+        });
+        feedCount++;
+      }
+
+      log('info', `  ✓ ${feed.name}: ${feedCount} مقال جديد`);
+      feedsSucceeded++;
+    } catch (err) {
+      log('warn', `  ✗ متعذر قراءة ${feed.name}: ${err.message}`);
+      feedsFailed++;
+    }
+  }
+
+  log('success', `تم جمع ${items.length} مقال حديث (${feedsSucceeded} خلاصة ناجحة، ${feedsFailed} فاشلة)`);
   return items;
 }
 
+// ─── Gemini Summarization ────────────────────────────────────────
 async function summarizeWithGemini(articles) {
   if (!process.env.GEMINI_API_KEY) {
     try {
       const envContent = await fs.readFile(path.join(process.cwd(), '.env'), 'utf-8');
       const match = envContent.match(/GEMINI_API_KEY=(.+)/);
-      if (match && match[1]) {
+      if (match?.[1]) {
         process.env.GEMINI_API_KEY = match[1].trim();
       }
     } catch {}
@@ -65,7 +241,7 @@ async function summarizeWithGemini(articles) {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.warn('⚠️ لم يتم العثور على GEMINI_API_KEY. سيتم استخدام وضع التجربة المحاكاة (Mocking).');
+    log('warn', 'لم يتم العثور على GEMINI_API_KEY. وضع المحاكاة.');
     return {
       news: articles.slice(0, 3).map((art) => ({
         title: `ملخص: ${art.title}`,
@@ -85,17 +261,21 @@ async function summarizeWithGemini(articles) {
 
   const ai = new GoogleGenAI({ apiKey });
 
-  const articlesPrompt = articles.map((art, i) => `
+  const articlesPrompt = articles
+    .map(
+      (art, i) => `
 --- مقال #${i + 1} ---
 المصدر: ${art.sourceName}
 العنوان الأصلي: ${art.title}
 الرابط: ${art.link}
 تاريخ النشر: ${art.pubDate}
 النص/المقتطف:
-${art.contentSnippet.slice(0, 2000)}
-`).join('\n');
+${art.contentSnippet.slice(0, 4000)}
+`
+    )
+    .join('\n');
 
-  console.log('🤖 جاري تحليل المقالات عبر Gemini 3.6 Flash لاستخراج الأخبار والأدوات الجديدة بالعربية...');
+  log('step', 'جاري تحليل المقالات عبر Gemini لاستخراج الأخبار والأدوات الجديدة بالعربية...');
 
   const newsItemSchema = {
     type: 'object',
@@ -136,16 +316,21 @@ ${art.contentSnippet.slice(0, 2000)}
     required: ['news', 'tools'],
   };
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-3.6-flash',
-    contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميع الأخبار البارزة واستخراج أي أدوات جديدة وتصدير النتائج باللغة العربية:\n\n${articlesPrompt}`,
-    config: {
-      systemInstruction: SYSTEM_PROMPT,
-      responseMimeType: 'application/json',
-      responseSchema,
-      temperature: 0.2,
-    },
-  });
+  const response = await withRetry(
+    () =>
+      ai.models.generateContent({
+        model: 'gemini-3.6-flash',
+        contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميع الأخبار البارزة واستخراج أي أدوات جديدة وتصدير النتائج باللغة العربية:\n\n${articlesPrompt}`,
+        config: {
+          systemInstruction: SYSTEM_PROMPT,
+          responseMimeType: 'application/json',
+          responseSchema,
+          temperature: 0.2,
+        },
+      }),
+    'Gemini API',
+    MAX_RETRIES
+  );
 
   const rawJson = response.text;
   const parsed = JSON.parse(rawJson);
@@ -155,78 +340,115 @@ ${art.contentSnippet.slice(0, 2000)}
   };
 }
 
-async function main() {
-  try {
-    const articles = await fetchRecentArticles();
+// ─── Save Content Files ──────────────────────────────────────────
+async function saveNewsFiles(newsList, history) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const newsDir = path.join(process.cwd(), 'src', 'content', 'news', todayStr);
+  await fs.mkdir(newsDir, { recursive: true });
 
-    if (articles.length === 0) {
-      console.log('ℹ️ لا توجد مقالات جديدة خلال الـ 48 ساعة الماضية.');
-      return;
+  let saved = 0;
+  let skipped = 0;
+
+  for (const item of newsList) {
+    // Validate category
+    const category = validateCategory(item.category, item.defaultCategory || 'أدوات وتطبيقات');
+
+    // Generate unique slug
+    const slug = sanitizeSlug(item.sourceName + '-' + item.title.slice(0, 40));
+    const filePath = path.join(newsDir, `${slug}.md`);
+
+    // Check if file already exists
+    try {
+      await fs.access(filePath);
+      log('info', `  ⏭️ ملف موجود، تخطي: ${slug}`);
+      skipped++;
+      continue;
+    } catch {
+      // Good — file doesn't exist
     }
 
-    const { news: newsList, tools: toolsList } = await summarizeWithGemini(articles);
-    console.log(`✨ تم توليد ${newsList.length} خبر ملخص و ${toolsList.length} أداة جديدة.`);
-
-    if (isDryRun) {
-      console.log('\n--- 🧪 وضع الاختيار والتجربة (--dry-run) ---');
-      console.log(JSON.stringify({ news: newsList, tools: toolsList }, null, 2));
-      return;
+    // Validate sourceUrl
+    let sourceUrl = item.sourceUrl || '';
+    try {
+      new URL(sourceUrl);
+    } catch {
+      sourceUrl = `https://www.google.com/search?q=${encodeURIComponent(item.title)}`;
+      log('warn', `  رابط مصدر غير صالح لـ "${item.title}"، استخدام بحث Google`);
     }
 
-    // 1. Save News Markdown files
-    const todayStr = new Date().toISOString().split('T')[0];
-    const newsDir = path.join(process.cwd(), 'src', 'content', 'news', todayStr);
-    await fs.mkdir(newsDir, { recursive: true });
+    // Clamp importance
+    const importance = Math.min(5, Math.max(1, Number(item.importance) || 3));
 
-    for (const item of newsList) {
-      const slug = sanitizeSlug(item.sourceName + '-' + item.title.slice(0, 30));
-      const filePath = path.join(newsDir, `${slug}.md`);
-
-      const frontmatter = `---
+    const frontmatter = `---
 title: ${JSON.stringify(item.title)}
 summary: ${JSON.stringify(item.summary)}
-category: ${JSON.stringify(item.category)}
+category: ${JSON.stringify(category)}
 tags: ${JSON.stringify(item.tags || [])}
 sourceName: ${JSON.stringify(item.sourceName)}
-sourceUrl: ${JSON.stringify(item.sourceUrl)}
+sourceUrl: ${JSON.stringify(sourceUrl)}
 publishedAt: ${JSON.stringify(item.publishedAt || new Date().toISOString())}
-importance: ${item.importance || 3}
+importance: ${importance}
 toolsMentioned: ${JSON.stringify(item.toolsMentioned || [])}
 ---
 
 ${item.bodyMarkdown}
 `;
 
-      await fs.writeFile(filePath, frontmatter, 'utf-8');
-      console.log(`  📰 تم حفظ الخبر: ${filePath}`);
+    await fs.writeFile(filePath, frontmatter, 'utf-8');
+    log('info', `  📰 تم حفظ الخبر: ${slug}`);
+    saved++;
+
+    // Track in history
+    if (item.sourceUrl) history.processedUrls.push(item.sourceUrl);
+    history.processedTitles.push(item.title);
+  }
+
+  return { saved, skipped };
+}
+
+async function saveToolFiles(toolsList, history) {
+  const toolsDir = path.join(process.cwd(), 'src', 'content', 'tools');
+  await fs.mkdir(toolsDir, { recursive: true });
+
+  let saved = 0;
+  let skipped = 0;
+
+  for (const tool of toolsList) {
+    const slug = sanitizeSlug(tool.name);
+    const filePath = path.join(toolsDir, `${slug}.md`);
+
+    // Check if tool file already exists
+    try {
+      await fs.access(filePath);
+      log('info', `  ⏭️ الأداة موجودة مسبقاً، تم تخطي: ${slug}`);
+      skipped++;
+      continue;
+    } catch {
+      // Good — file doesn't exist
     }
 
-    // 2. Save Tools Markdown files
-    const toolsDir = path.join(process.cwd(), 'src', 'content', 'tools');
-    await fs.mkdir(toolsDir, { recursive: true });
+    // Validate category
+    const category = validateCategory(tool.category, 'أدوات وتطبيقات');
 
-    const validPricing = ['free', 'freemium', 'paid'];
+    // Validate pricing
+    const pricing = VALID_PRICING.includes(tool.pricing?.toLowerCase())
+      ? tool.pricing.toLowerCase()
+      : 'freemium';
 
-    for (const tool of toolsList) {
-      const slug = sanitizeSlug(tool.name);
-      const filePath = path.join(toolsDir, `${slug}.md`);
+    // Validate URL
+    let url = tool.url || '';
+    try {
+      new URL(url);
+    } catch {
+      url = `https://www.google.com/search?q=${encodeURIComponent(tool.name)}`;
+      log('warn', `  رابط أداة غير صالح لـ "${tool.name}"، استخدام بحث Google`);
+    }
 
-      // Check if tool file already exists to prevent overwriting custom entries
-      try {
-        await fs.access(filePath);
-        console.log(`  ℹ️ الأداة موجودة مسبقاً، تم تخطي: ${slug}`);
-        continue;
-      } catch {
-        // File does not exist, write new tool
-      }
-
-      const pricing = validPricing.includes(tool.pricing?.toLowerCase()) ? tool.pricing.toLowerCase() : 'freemium';
-
-      const toolFrontmatter = `---
+    const toolFrontmatter = `---
 name: ${JSON.stringify(tool.name)}
 description: ${JSON.stringify(tool.description)}
-category: ${JSON.stringify(tool.category || 'أدوات وتطبيقات')}
-url: ${JSON.stringify(tool.url || 'https://google.com')}
+category: ${JSON.stringify(category)}
+url: ${JSON.stringify(url)}
 pricing: ${JSON.stringify(pricing)}
 tags: ${JSON.stringify(tool.tags || [])}
 addedAt: ${JSON.stringify(new Date().toISOString())}
@@ -235,13 +457,61 @@ addedAt: ${JSON.stringify(new Date().toISOString())}
 ${tool.description}
 `;
 
-      await fs.writeFile(filePath, toolFrontmatter, 'utf-8');
-      console.log(`  🛠️ تم حفظ أداة جديدة: ${filePath}`);
+    await fs.writeFile(filePath, toolFrontmatter, 'utf-8');
+    log('info', `  🛠️ تم حفظ أداة جديدة: ${slug}`);
+    saved++;
+
+    // Track in history
+    if (tool.url) history.processedUrls.push(tool.url);
+    history.processedTitles.push(tool.name);
+  }
+
+  return { saved, skipped };
+}
+
+// ─── Main ────────────────────────────────────────────────────────
+async function main() {
+  try {
+    log('step', '🚀 بدء عملية الجلب والتحليل...');
+
+    // Load deduplication history
+    const history = await loadHistory();
+    log('info', `📂 سجل التاريخ: ${history.processedUrls.length} رابط محفوظ`);
+
+    // Fetch articles
+    const articles = await fetchRecentArticles(history);
+
+    if (articles.length === 0) {
+      log('info', 'لا توجد مقالات جديدة خلال الـ 48 ساعة الماضية.');
+      await saveLog();
+      return;
     }
 
-    console.log('🎉 اكتملت عملية الجلب والتلخيص وحفظ الأدوات بنجاح!');
+    // Summarize with Gemini
+    const { news: newsList, tools: toolsList } = await summarizeWithGemini(articles);
+    log('success', `تم توليد ${newsList.length} خبر ملخص و ${toolsList.length} أداة جديدة.`);
+
+    if (isDryRun) {
+      log('info', '🧪 وضع التجربة (--dry-run) — لن يتم حفظ الملفات.');
+      console.log('\n' + JSON.stringify({ news: newsList, tools: toolsList }, null, 2));
+      await saveLog();
+      return;
+    }
+
+    // Save files
+    const newsResult = await saveNewsFiles(newsList, history);
+    const toolsResult = await saveToolFiles(toolsList, history);
+
+    // Save updated history
+    await saveHistory(history);
+
+    log('success', `🎉 اكتمل! أخبار: ${newsResult.saved} جديد / ${newsResult.skipped} تخطي | أدوات: ${toolsResult.saved} جديد / ${toolsResult.skipped} تخطي`);
+
+    // Save structured log
+    await saveLog();
   } catch (err) {
-    console.error('❌ خطأ أثناء تنفيذ عملية الجلب والتلخيص:', err);
+    log('error', `خطأ أثناء تنفيذ عملية الجلب والتلخيص: ${err.message}`, { stack: err.stack });
+    await saveLog();
     process.exit(1);
   }
 }

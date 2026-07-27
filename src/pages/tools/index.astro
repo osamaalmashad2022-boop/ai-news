@@ -5,6 +5,7 @@ import ToolCard from '../../components/ToolCard.astro';
 
 const allTools = await getCollection('tools');
 const sortedTools = allTools.sort((a, b) => b.data.addedAt.getTime() - a.data.addedAt.getTime());
+const INITIAL_COUNT = 12;
 ---
 
 <BaseLayout title="دليل أدوات الذكاء الاصطناعي - نبض الذكاء AI" description="دليل شامل ومحدث لأهم وتطبيقات ومواقع الذكاء الاصطناعي في مختلف المجالات">
@@ -14,15 +15,137 @@ const sortedTools = allTools.sort((a, b) => b.data.addedAt.getTime() - a.data.ad
         دليل أدوات الذكاء الاصطناعي
       </h1>
       <p class="text-gray-400 text-sm sm:text-base">
-        استكشف أحدث البرامج والمواقع والتطبيقات المبنية على التقنيات الذكية مع توضيح خيارات التسعير
+        استكشف أحدث البرامج والمواقع والتطبيقات المبنية على التقنيات الذكية
+        <span class="text-neon-purple font-semibold">({sortedTools.length} أداة)</span>
       </p>
     </div>
 
+    <!-- Pricing Filter -->
+    <div class="pricing-filter flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar py-4">
+      <button type="button" data-pricing="all" class="pricing-btn active-pricing whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-neon-purple/20 text-neon-purple border border-neon-purple/40 shadow-sm shadow-neon-purple/10 transition-all duration-300 cursor-pointer">
+        الكل
+      </button>
+      <button type="button" data-pricing="free" class="pricing-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-dark-card/60 text-gray-400 hover:text-white border border-dark-border/60 hover:bg-dark-hover transition-all duration-300 cursor-pointer">
+        🟢 مجاني
+      </button>
+      <button type="button" data-pricing="freemium" class="pricing-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-dark-card/60 text-gray-400 hover:text-white border border-dark-border/60 hover:bg-dark-hover transition-all duration-300 cursor-pointer">
+        🟡 فريميوم
+      </button>
+      <button type="button" data-pricing="paid" class="pricing-btn whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-dark-card/60 text-gray-400 hover:text-white border border-dark-border/60 hover:bg-dark-hover transition-all duration-300 cursor-pointer">
+        🔴 مدفوع
+      </button>
+    </div>
+
     <!-- Tools Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {sortedTools.map((tool) => (
-        <ToolCard tool={tool} />
+    <div class="tools-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {sortedTools.map((tool, index) => (
+        <div class:list={[index >= INITIAL_COUNT && 'hidden load-more-tool']}>
+          <ToolCard tool={tool} />
+        </div>
       ))}
     </div>
+
+    <!-- Load More Button -->
+    {sortedTools.length > INITIAL_COUNT && (
+      <div class="text-center pt-6">
+        <button
+          id="load-more-tools"
+          type="button"
+          class="px-8 py-3.5 rounded-xl bg-dark-card/90 text-white font-semibold text-sm border border-dark-border hover:border-neon-purple/40 hover:bg-dark-hover transition-all duration-300 hover:-translate-y-0.5 inline-flex items-center gap-2"
+          data-total={sortedTools.length}
+          data-loaded={INITIAL_COUNT}
+          data-step="12"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+          <span>تحميل المزيد</span>
+          <span class="text-xs text-gray-400" id="load-more-tools-count">
+            ({sortedTools.length - INITIAL_COUNT} متبقي)
+          </span>
+        </button>
+      </div>
+    )}
   </div>
 </BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    // ─── Pricing Filter ───
+    const pricingBtns = document.querySelectorAll('.pricing-btn');
+    const toolsGrid = document.querySelector('.tools-grid');
+
+    pricingBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const pricing = btn.getAttribute('data-pricing');
+
+        // Update active states
+        pricingBtns.forEach((b) => {
+          b.classList.remove('bg-neon-purple/20', 'text-neon-purple', 'border-neon-purple/40', 'shadow-sm', 'shadow-neon-purple/10', 'active-pricing');
+          b.classList.add('bg-dark-card/60', 'text-gray-400', 'border-dark-border/60');
+        });
+        btn.classList.remove('bg-dark-card/60', 'text-gray-400', 'border-dark-border/60');
+        btn.classList.add('bg-neon-purple/20', 'text-neon-purple', 'border-neon-purple/40', 'shadow-sm', 'shadow-neon-purple/10', 'active-pricing');
+
+        if (!toolsGrid) return;
+
+        // Filter cards — look inside wrappers
+        const wrappers = toolsGrid.querySelectorAll(':scope > div');
+        wrappers.forEach((wrapper) => {
+          const card = wrapper.querySelector('[data-pricing]');
+          if (!card) return;
+
+          const cardPricing = card.getAttribute('data-pricing');
+          const shouldShow = pricing === 'all' || cardPricing === pricing;
+          const el = wrapper as HTMLElement;
+
+          if (shouldShow) {
+            el.style.display = '';
+            el.classList.remove('hidden');
+          } else {
+            el.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // ─── Load More ───
+    const loadMoreBtn = document.getElementById('load-more-tools');
+    if (!loadMoreBtn) return;
+
+    loadMoreBtn.addEventListener('click', () => {
+      const step = parseInt(loadMoreBtn.getAttribute('data-step') || '12');
+      let loaded = parseInt(loadMoreBtn.getAttribute('data-loaded') || '12');
+      const total = parseInt(loadMoreBtn.getAttribute('data-total') || '0');
+
+      const hiddenItems = document.querySelectorAll('.load-more-tool.hidden');
+      const toShow = Array.from(hiddenItems).slice(0, step);
+
+      toShow.forEach((item, i) => {
+        item.classList.remove('hidden');
+        const el = item as HTMLElement;
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, i * 50);
+      });
+
+      loaded += toShow.length;
+      loadMoreBtn.setAttribute('data-loaded', loaded.toString());
+
+      const remaining = total - loaded;
+      const countEl = document.getElementById('load-more-tools-count');
+      if (countEl) {
+        countEl.textContent = `(${remaining} متبقي)`;
+      }
+
+      if (remaining <= 0) {
+        loadMoreBtn.style.display = 'none';
+      }
+    });
+  });
+</script>

@@ -1,0 +1,198 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allNews = await getCollection('news');
+const allTools = await getCollection('tools');
+
+// Sort by date
+const sortedNews = allNews.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+// ── Category Distribution (News) ──
+const categoryCount: Record<string, number> = {};
+for (const item of allNews) {
+  const cat = item.data.category;
+  categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+}
+const maxCategoryCount = Math.max(...Object.values(categoryCount), 1);
+const categoryEntries = Object.entries(categoryCount).sort((a, b) => b[1] - a[1]);
+
+// ── Pricing Distribution (Tools) ──
+const pricingCount: Record<string, number> = { free: 0, freemium: 0, paid: 0 };
+for (const tool of allTools) {
+  pricingCount[tool.data.pricing] = (pricingCount[tool.data.pricing] || 0) + 1;
+}
+
+// ── Source Distribution (News) ──
+const sourceCount: Record<string, number> = {};
+for (const item of allNews) {
+  const src = item.data.sourceName;
+  sourceCount[src] = (sourceCount[src] || 0) + 1;
+}
+const sourceEntries = Object.entries(sourceCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+// ── Daily Activity (Last 30 days) ──
+const now = new Date();
+const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+const dailyActivity: Record<string, number> = {};
+for (const item of allNews) {
+  const date = item.data.publishedAt.toISOString().split('T')[0];
+  if (new Date(date) >= thirtyDaysAgo) {
+    dailyActivity[date] = (dailyActivity[date] || 0) + 1;
+  }
+}
+const activityDates = Object.entries(dailyActivity).sort((a, b) => a[0].localeCompare(b[0]));
+const maxDailyCount = Math.max(...Object.values(dailyActivity), 1);
+
+// ── Category Colors ──
+const categoryColors: Record<string, string> = {
+  'نماذج لغوية': '#3b82f6',
+  'توليد الصور والفيديو': '#8b5cf6',
+  'الصوت': '#ec4899',
+  'البرمجة': '#10b981',
+  'الأبحاث': '#06b6d4',
+  'الأعمال والتمويل': '#f59e0b',
+  'السياسات والأخلاقيات': '#f43f5e',
+  'أدوات وتطبيقات': '#6366f1',
+};
+
+const pricingLabels: Record<string, { label: string; color: string }> = {
+  free: { label: 'مجاني', color: '#10b981' },
+  freemium: { label: 'فريميوم', color: '#f59e0b' },
+  paid: { label: 'مدفوع', color: '#f43f5e' },
+};
+---
+
+<BaseLayout title="إحصائيات الموقع - نبض الذكاء AI" description="لوحة إحصائيات ومراقبة لمنظومة جلب وعرض الأخبار والأدوات">
+  <div class="space-y-10">
+    <!-- Header -->
+    <div class="border-b border-dark-border/60 pb-6 space-y-2">
+      <h1 class="text-3xl sm:text-4xl font-extrabold font-heading text-white flex items-center gap-3">
+        <span class="w-2.5 h-7 rounded-full bg-neon-cyan inline-block"></span>
+        إحصائيات الموقع
+      </h1>
+      <p class="text-gray-400 text-sm sm:text-base">
+        مراقبة حالة الجلب والمحتوى وتوزيع التصنيفات
+      </p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="glass-card p-6 text-center space-y-2">
+        <div class="text-3xl font-bold font-heading text-neon-cyan">{allNews.length}</div>
+        <div class="text-xs text-gray-400 font-medium">إجمالي الأخبار</div>
+      </div>
+      <div class="glass-card p-6 text-center space-y-2">
+        <div class="text-3xl font-bold font-heading text-neon-purple">{allTools.length}</div>
+        <div class="text-xs text-gray-400 font-medium">إجمالي الأدوات</div>
+      </div>
+      <div class="glass-card p-6 text-center space-y-2">
+        <div class="text-3xl font-bold font-heading text-neon-blue">{Object.keys(sourceCount).length}</div>
+        <div class="text-xs text-gray-400 font-medium">مصادر نشطة</div>
+      </div>
+      <div class="glass-card p-6 text-center space-y-2">
+        <div class="text-3xl font-bold font-heading text-neon-amber">{activityDates.length}</div>
+        <div class="text-xs text-gray-400 font-medium">أيام نشطة (30 يوم)</div>
+      </div>
+    </div>
+
+    <!-- Category Distribution -->
+    <section class="glass-card p-6 sm:p-8 space-y-5">
+      <h2 class="text-xl font-bold font-heading text-white">توزيع الأخبار حسب التصنيف</h2>
+      <div class="space-y-3">
+        {categoryEntries.map(([cat, count]) => {
+          const percentage = Math.round((count / maxCategoryCount) * 100);
+          const color = categoryColors[cat] || '#6b7280';
+          return (
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-300 font-medium">{cat}</span>
+                <span class="text-gray-400 font-mono text-xs">{count} خبر</span>
+              </div>
+              <div class="w-full h-2.5 rounded-full bg-dark-surface overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  style={`width: ${percentage}%; background-color: ${color};`}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- Two Column: Pricing + Sources -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Pricing Distribution -->
+      <section class="glass-card p-6 sm:p-8 space-y-5">
+        <h2 class="text-xl font-bold font-heading text-white">توزيع الأدوات حسب التسعير</h2>
+        <div class="flex items-center justify-center gap-8 py-4">
+          {Object.entries(pricingCount).map(([key, count]) => {
+            const info = pricingLabels[key];
+            const total = allTools.length || 1;
+            const percentage = Math.round((count / total) * 100);
+            return (
+              <div class="text-center space-y-2">
+                <div class="relative w-20 h-20 mx-auto">
+                  <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#2a2a3c" stroke-width="3" />
+                    <circle
+                      cx="18" cy="18" r="15.9155" fill="none"
+                      stroke={info.color}
+                      stroke-width="3"
+                      stroke-dasharray={`${percentage} ${100 - percentage}`}
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <span class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">
+                    {count}
+                  </span>
+                </div>
+                <div class="text-xs font-medium" style={`color: ${info.color}`}>{info.label}</div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <!-- Top Sources -->
+      <section class="glass-card p-6 sm:p-8 space-y-5">
+        <h2 class="text-xl font-bold font-heading text-white">أكثر المصادر نشاطاً</h2>
+        <div class="space-y-2.5">
+          {sourceEntries.map(([source, count], i) => (
+            <div class="flex items-center justify-between text-sm py-1.5 border-b border-dark-border/30 last:border-0">
+              <span class="flex items-center gap-2 text-gray-300">
+                <span class="text-xs font-mono text-gray-500 w-5">{i + 1}.</span>
+                {source}
+              </span>
+              <span class="text-xs font-mono px-2 py-0.5 rounded-md bg-dark-surface text-gray-400 border border-dark-border/40">
+                {count}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+
+    <!-- Daily Activity Heatmap -->
+    <section class="glass-card p-6 sm:p-8 space-y-5">
+      <h2 class="text-xl font-bold font-heading text-white">نشاط الجلب اليومي (آخر 30 يوم)</h2>
+      <div class="flex items-end gap-1 overflow-x-auto pb-2" style="min-height: 120px;">
+        {activityDates.map(([date, count]) => {
+          const height = Math.max(8, Math.round((count / maxDailyCount) * 100));
+          const day = new Date(date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+          return (
+            <div class="flex flex-col items-center gap-1 flex-shrink-0" title={`${day}: ${count} خبر`}>
+              <span class="text-[10px] text-gray-500 font-mono">{count}</span>
+              <div
+                class="w-6 sm:w-8 rounded-t-md bg-gradient-to-t from-neon-blue to-neon-cyan transition-all duration-300 hover:from-neon-cyan hover:to-neon-purple"
+                style={`height: ${height}px;`}
+              />
+              <span class="text-[9px] text-gray-500 writing-mode-vertical whitespace-nowrap">{day}</span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

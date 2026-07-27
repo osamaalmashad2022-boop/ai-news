@@ -12,6 +12,9 @@ dist/
 .env.*
 !.env.example
 
+# Ingest logs
+logs/
+
 # OS files
 .DS_Store
 Thumbs.db
