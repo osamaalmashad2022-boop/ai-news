@@ -1,5 +1,27 @@
 {
-  "processedUrls": [],
-  "processedTitles": [],
-  "lastRunAt": null
+  "processedUrls": [
+    "https://techcrunch.com/2026/07/27/openais-hugging-face-breach-has-reignited-the-debate-over-alignment-and-control/",
+    "https://techcrunch.com/2026/07/27/microsoft-launches-its-first-cyber-model-and-a-new-agentic-cybersecurity-system/",
+    "https://techcrunch.com/2026/07/27/ilya-sutskevers-safe-superintelligence-partners-with-nvidia-to-scale-its-ai-research/",
+    "https://the-decoder.com/moonshot-ai-releases-kimi-k3-open-weights-and-infrastructure-after-shaking-up-the-frontier-model-race/",
+    "https://openai.com/index/how-ai-is-expanding-what-people-do-at-work",
+    "https://huggingface.co/blog/nvidia/cosmos-h-dreams",
+    "https://techcrunch.com/2026/07/27/microsoft-launches-its-first-cyber-model-and-a-new-agentic-cybersecurity-system/",
+    "https://www.marktechpost.com/2026/07/27/perplexity-releases-pplx/",
+    "https://www.marktechpost.com/2026/07/27/kimi-ai-and-kvcache-ai-open-sources-agentenv/",
+    "https://techcrunch.com/2026/07/27/this-9-key-physically-locks-your-most-addictive-apps/"
+  ],
+  "processedTitles": [
+    "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
+    "مايكروسوفت تطلق أول نموذج ذكاء اصطناعي متخصص في الأمن السيبراني MAI-Cyber-1-Flash",
+    "شراكة بمليارات الدولارات بين Safe Superintelligence وNvidia لدعم أبحاث الذكاء الفائق",
+    "Moonshot AI تطلق أوزان نموذج Kimi K3 وبنيته التحتية المصاحبة مجاناً",
+    "دراسة لـ OpenAI تكشف: 43.5% من استخدامات ChatGPT تتجاوز التخصص الوظيفي للمستخدمين",
+    "Cosmos-H-Dreams",
+    "MAI-Cyber-1-Flash",
+    "pplx",
+    "AgentENV",
+    "Autonomous Key"
+  ],
+  "lastRunAt": "2026-07-28T07:35:33.001Z"
 }
