@@ -21,7 +21,6 @@ const categories = [
 
 <div class="category-filter flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar py-4" data-target={target}>
   {categories.map((category) => {
-    const isAll = category === 'الكل';
     const isActive = activeCategory === category;
 
     return (
@@ -64,7 +63,8 @@ const categories = [
           const cards = grid.querySelectorAll('[data-category]');
           let visibleCount = 0;
 
-          cards.forEach((card) => {
+          cards.forEach((el) => {
+            const card = el as HTMLElement;
             const cardCategory = card.getAttribute('data-category');
             const shouldShow = category === 'الكل' || cardCategory === category;
 
@@ -84,7 +84,7 @@ const categories = [
           });
 
           // Show empty state if needed
-          let emptyState = grid.querySelector('.filter-empty-state');
+          let emptyState = grid.querySelector('.filter-empty-state') as HTMLElement | null;
           if (visibleCount === 0) {
             if (!emptyState) {
               emptyState = document.createElement('div');

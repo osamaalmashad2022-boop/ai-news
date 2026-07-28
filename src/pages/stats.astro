@@ -5,8 +5,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const allNews = await getCollection('news');
 const allTools = await getCollection('tools');
 
-// Sort by date
-const sortedNews = allNews.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
 // ── Category Distribution (News) ──
 const categoryCount: Record<string, number> = {};
