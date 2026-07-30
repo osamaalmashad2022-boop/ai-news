@@ -9,7 +9,19 @@
     "https://techcrunch.com/2026/07/27/microsoft-launches-its-first-cyber-model-and-a-new-agentic-cybersecurity-system/",
     "https://www.marktechpost.com/2026/07/27/perplexity-releases-pplx/",
     "https://www.marktechpost.com/2026/07/27/kimi-ai-and-kvcache-ai-open-sources-agentenv/",
-    "https://techcrunch.com/2026/07/27/this-9-key-physically-locks-your-most-addictive-apps/"
+    "https://techcrunch.com/2026/07/27/this-9-key-physically-locks-your-most-addictive-apps/",
+    "https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6",
+    "https://deepmind.google/blog/gemini-robotics-er-2-powering-robotics-with-video-understanding-task-orchestration-and-multi-robot-collaboration/",
+    "https://techcrunch.com/2026/07/30/in-the-hugging-face-breach-openais-hacker-was-noisy-and-fast-but-not-unstoppable/",
+    "https://techcrunch.com/2026/07/30/linkedin-adds-a-button-to-report-ai-generated-slop/",
+    "https://arstechnica.com/security/2026/07/mythos-uncovers-crypto-weaknesses-that-went-unknown-for-years/",
+    "https://www.marktechpost.com/2026/07/30/token-saver-an-open-source-mcp-extension-using-local-hybrid-rag/",
+    "https://www.marktechpost.com/2026/07/28/fireworks-ai-releases-fireworks-nexus-a-drop-in-routing-and-cost-control-layer-that-moves-routine-coding-work-to-open-weight-models/",
+    "https://www.marktechpost.com/2026/07/29/moonshot-ai-open-sources-moonep-a-perfectly-balanced-expert-parallelism-library-for-moe-training/",
+    "https://techcrunch.com/2026/07/29/as-ai-content-floods-the-internet-pangram-raises-9m-to-detect-it/",
+    "https://techcrunch.com/2026/07/29/hint-a-new-ai-startup-co-founded-by-martha-stewart-offers-an-ai-assistant-for-homeowners/",
+    "https://www.marktechpost.com/2026/07/30/tencent-open-sources-angelspec-a-unified-training-framework-for-mtp-and-block-parallel-speculative-decoding-on-hy3-models/",
+    "https://www.marktechpost.com/2026/07/29/liquid-ai-releases-lfm2-5-encoder-230m-and-lfm2-5-encoder-350m-bidirectional-encoders-that-stay-fast-at-8k-context-on-cpu/"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -21,7 +33,19 @@
     "MAI-Cyber-1-Flash",
     "pplx",
     "AgentENV",
-    "Autonomous Key"
+    "Autonomous Key",
+    "أوبن إيه آي تخفض أسعار نماذج GPT-5.6 وتطلق نمط المعالجة السريعة Fast Mode",
+    "قوقل ديب مايند تطلق نموذج Gemini Robotics 2 للتحكم الكامل في حركة الروبوتات",
+    "تحقيقات تكشف كواليس اختراق نموذج أوبن إيه آي المستقل لمنصة Hugging Face",
+    "لينكد إن تضيف زراً للإبلاغ عن المحتوى المبتذل المولد بالذكاء الاصطناعي",
+    "نموذج Anthropic Mythos يكتشف ثغرة قاتلة في خوارزمية التشفير الكمومي HAWK",
+    "Token Saver",
+    "Fireworks Nexus",
+    "MoonEP",
+    "Pangram 4",
+    "Hint",
+    "AngelSpec",
+    "LFM2.5-Encoder"
   ],
-  "lastRunAt": "2026-07-28T07:35:33.001Z"
+  "lastRunAt": "2026-07-30T18:19:57.186Z"
 }
