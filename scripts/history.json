@@ -21,7 +21,19 @@
     "https://techcrunch.com/2026/07/29/as-ai-content-floods-the-internet-pangram-raises-9m-to-detect-it/",
     "https://techcrunch.com/2026/07/29/hint-a-new-ai-startup-co-founded-by-martha-stewart-offers-an-ai-assistant-for-homeowners/",
     "https://www.marktechpost.com/2026/07/30/tencent-open-sources-angelspec-a-unified-training-framework-for-mtp-and-block-parallel-speculative-decoding-on-hy3-models/",
-    "https://www.marktechpost.com/2026/07/29/liquid-ai-releases-lfm2-5-encoder-230m-and-lfm2-5-encoder-350m-bidirectional-encoders-that-stay-fast-at-8k-context-on-cpu/"
+    "https://www.marktechpost.com/2026/07/29/liquid-ai-releases-lfm2-5-encoder-230m-and-lfm2-5-encoder-350m-bidirectional-encoders-that-stay-fast-at-8k-context-on-cpu/",
+    "https://techcrunch.com/2026/07/30/anthropic-says-its-own-ai-models-breached-three-companies-during-security-tests/",
+    "https://openai.com/index/building-abundant-intelligence",
+    "https://www.technologyreview.com/2026/07/30/1140927/a-fundamental-flaw-leaves-llms-vulnerable-to-attack/",
+    "https://the-decoder.com/thinking-machines-bets-on-efficiency-over-size-with-its-second-model-inkling-small/",
+    "https://www.theverge.com/tech/973738/robot-vacuum-ban-fewer-choices-higher-prices",
+    "https://huggingface.co/models",
+    "https://huggingface.co/DeepSeek",
+    "https://github.com/JetBrains/kotlinllm",
+    "https://github.com/nousresearch/hermes-agent",
+    "https://techcrunch.com/2026/07/30/friend-the-lonely-ai-wearable-returns-with-a-new-voice-and-a-much-bigger-price-tag/",
+    "https://arstechnica.com/ai/2026/07/google-reveals-gemini-robotics-2-0-promising-improved-dexterity-and-safety/",
+    "https://techcrunch.com/2026/07/31/smallest-ai-raises-13m-to-build-ultra-fast-voice-ai-that-sounds-genuinely-human/"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -45,7 +57,19 @@
     "Pangram 4",
     "Hint",
     "AngelSpec",
-    "LFM2.5-Encoder"
+    "LFM2.5-Encoder",
+    "اختراقات أمنية غير مقصودة لأنظمة الذكاء الاصطناعي تدفع الشركات والدعوات المطالبة بإبطاء السباق التقني",
+    "حرب أسعار وتنافس محدم: OpenAI تخفض أسعار GPT-5.6 بنسبة 80% وDeepSeek ترد بنموذج V4 Flash",
+    "جوجل تطلق روبوتات Gemini Robotics 2.0 لتحقيق الذكاء الاصطناعي الفيزيائي الشامل",
+    "مؤسسة Thinking Machines التابعة لميرا موراتي تطلق نموذج Inkling Small المفتوح",
+    "هيئة الاتصالات الفيدرالية الأمريكية تحظر الروبوتات المتحركة الأجنبية لأسباب أمنية",
+    "Inkling Small",
+    "DeepSeek V4 Flash 0731",
+    "KotlinLLM",
+    "Hermes Agent for Buzz",
+    "Friend 2.0",
+    "Gemini Robotics ER 2",
+    "Smallest.ai"
   ],
-  "lastRunAt": "2026-07-30T18:19:57.186Z"
+  "lastRunAt": "2026-07-31T18:23:55.727Z"
 }
