@@ -227,7 +227,72 @@ async function fetchRecentArticles(history) {
   return items;
 }
 
-// ─── Gemini Summarization ────────────────────────────────────────
+// ─── Gemini Summarization (Batched + Model Fallbacks + Backoff) ─────
+async function callGeminiBatchWithFallback(ai, articlesBatch, responseSchema) {
+  const FALLBACK_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
+  const MAX_RETRIES_PER_MODEL = 3;
+
+  const articlesPrompt = articlesBatch
+    .map(
+      (art, i) => `
+--- مقال #${i + 1} ---
+المصدر: ${art.sourceName}
+العنوان الأصلي: ${art.title}
+الرابط: ${art.link}
+تاريخ النشر: ${art.pubDate}
+النص/المقتطف:
+${art.contentSnippet.slice(0, 1500)}
+`
+    )
+    .join('\n');
+
+  for (const model of FALLBACK_MODELS) {
+    for (let attempt = 1; attempt <= MAX_RETRIES_PER_MODEL; attempt++) {
+      try {
+        log('info', `  🤖 محاولة التلخيص عبر ${model} (محاولة ${attempt}/${MAX_RETRIES_PER_MODEL})...`);
+        const response = await ai.models.generateContent({
+          model,
+          contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميع الأخبار البارزة واستخراج أي أدوات جديدة وتصدير النتائج باللغة العربية:\n\n${articlesPrompt}`,
+          config: {
+            systemInstruction: SYSTEM_PROMPT,
+            responseMimeType: 'application/json',
+            responseSchema,
+            temperature: 0.2,
+          },
+        });
+
+        const rawJson = response.text;
+        const parsed = JSON.parse(rawJson);
+        return {
+          news: parsed.news || [],
+          tools: parsed.tools || [],
+        };
+      } catch (err) {
+        const isTransient =
+          err.status === 503 ||
+          err.status === 429 ||
+          err.status === 500 ||
+          err.message?.includes('503') ||
+          err.message?.includes('demand') ||
+          err.message?.includes('quota') ||
+          err.message?.includes('RESOURCE_EXHAUSTED') ||
+          err.message?.includes('UNAVAILABLE');
+
+        if (attempt < MAX_RETRIES_PER_MODEL && isTransient) {
+          const jitter = Math.random() * 1000;
+          const delay = Math.min(2000 * Math.pow(2, attempt - 1) + jitter, 15000);
+          log('warn', `  ⚠️ النموذج ${model} واجه خطأ مؤقت (${err.status || err.message}). إعادة المحاولة بعد ${Math.round(delay)}ms...`);
+          await new Promise((r) => setTimeout(r, delay));
+        } else if (attempt === MAX_RETRIES_PER_MODEL) {
+          log('warn', `  ⚠️ فشل النموذج ${model} بعد ${MAX_RETRIES_PER_MODEL} محاولات: ${err.message}. الانتقال للنموذج البديل...`);
+        }
+      }
+    }
+  }
+
+  throw new Error('فشلت جميع نماذج Gemini المتاحة للدفعة الحالية');
+}
+
 async function summarizeWithGemini(articles) {
   if (!process.env.GEMINI_API_KEY) {
     try {
@@ -260,22 +325,6 @@ async function summarizeWithGemini(articles) {
   }
 
   const ai = new GoogleGenAI({ apiKey });
-
-  const articlesPrompt = articles
-    .map(
-      (art, i) => `
---- مقال #${i + 1} ---
-المصدر: ${art.sourceName}
-العنوان الأصلي: ${art.title}
-الرابط: ${art.link}
-تاريخ النشر: ${art.pubDate}
-النص/المقتطف:
-${art.contentSnippet.slice(0, 4000)}
-`
-    )
-    .join('\n');
-
-  log('step', 'جاري تحليل المقالات عبر Gemini لاستخراج الأخبار والأدوات الجديدة بالعربية...');
 
   const newsItemSchema = {
     type: 'object',
@@ -316,27 +365,38 @@ ${art.contentSnippet.slice(0, 4000)}
     required: ['news', 'tools'],
   };
 
-  const response = await withRetry(
-    () =>
-      ai.models.generateContent({
-        model: 'gemini-3.6-flash',
-        contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميع الأخبار البارزة واستخراج أي أدوات جديدة وتصدير النتائج باللغة العربية:\n\n${articlesPrompt}`,
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
-          responseMimeType: 'application/json',
-          responseSchema,
-          temperature: 0.2,
-        },
-      }),
-    'Gemini API',
-    MAX_RETRIES
-  );
+  const BATCH_SIZE = 12;
+  const batches = [];
+  for (let i = 0; i < articles.length; i += BATCH_SIZE) {
+    batches.push(articles.slice(i, i + BATCH_SIZE));
+  }
 
-  const rawJson = response.text;
-  const parsed = JSON.parse(rawJson);
+  log('step', `جاري تحليل ${articles.length} مقال مقسمة على ${batches.length} دفعة عبر Gemini...`);
+
+  const allNews = [];
+  const allTools = [];
+
+  for (let bIndex = 0; bIndex < batches.length; bIndex++) {
+    const batch = batches[bIndex];
+    log('info', `📦 معالجة الدفعة ${bIndex + 1}/${batches.length} (${batch.length} مقال)...`);
+
+    try {
+      const result = await callGeminiBatchWithFallback(ai, batch, responseSchema);
+      allNews.push(...result.news);
+      allTools.push(...result.tools);
+      log('success', `  ✓ اكتملت الدفعة ${bIndex + 1}: ${result.news.length} خبر، ${result.tools.length} أداة.`);
+    } catch (err) {
+      log('error', `  ❌ تعذر معالجة الدفعة ${bIndex + 1}: ${err.message}`);
+    }
+
+    if (bIndex < batches.length - 1) {
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+  }
+
   return {
-    news: parsed.news || [],
-    tools: parsed.tools || [],
+    news: allNews,
+    tools: allTools,
   };
 }
 
