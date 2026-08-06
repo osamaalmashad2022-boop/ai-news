@@ -227,7 +227,8 @@ async function fetchRecentArticles(history) {
       log('info', `  ✓ ${feed.name}: ${feedCount} مقال جديد`);
       feedsSucceeded++;
     } catch (err) {
-      log('warn', `  ✗ متعذر قراءة ${feed.name}: ${err.message}`);
+      const level = feed.optional ? 'info' : 'warn';
+      log(level, `  ✗ متعذر قراءة ${feed.name}: ${err.message}`);
       feedsFailed++;
     }
   }

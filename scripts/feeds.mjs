@@ -2,9 +2,9 @@ export const RSS_FEEDS = [
   // كبرى الشركات والمختبرات
   { name: 'OpenAI', url: 'https://openai.com/news/rss.xml', categoryDefault: 'نماذج لغوية' },
   { name: 'Google DeepMind', url: 'https://deepmind.google/blog/rss.xml', categoryDefault: 'نماذج لغوية' },
-  { name: 'Anthropic', url: 'https://www.anthropic.com/rss.xml', categoryDefault: 'نماذج لغوية' },
+  { name: 'Anthropic', url: 'https://www.anthropic.com/rss.xml', categoryDefault: 'نماذج لغوية', optional: true },
   { name: 'Hugging Face', url: 'https://huggingface.co/blog/feed.xml', categoryDefault: 'البرمجة' },
-  { name: 'Meta AI', url: 'https://ai.meta.com/blog/rss/', categoryDefault: 'الأبحاث' },
+  { name: 'Meta AI', url: 'https://engineering.fb.com/feed/', categoryDefault: 'الأبحاث' },
 
   // منصات الأخبار التقنية المتخصصة
   { name: 'TechCrunch AI', url: 'https://techcrunch.com/category/artificial-intelligence/feed/', categoryDefault: 'الأعمال والتمويل' },
@@ -18,7 +18,7 @@ export const RSS_FEEDS = [
 
   // اكتشاف الأدوات الجديدة
   { name: 'Product Hunt', url: 'https://www.producthunt.com/feed', categoryDefault: 'أدوات وتطبيقات' },
-  { name: "Ben's Bites", url: 'https://bensbites.beehiiv.com/feed', categoryDefault: 'أدوات وتطبيقات' },
+  { name: "Ben's Bites", url: 'https://bensbites.com/feed', categoryDefault: 'أدوات وتطبيقات' },
 ];
 
 export const CATEGORIES = [
