@@ -24,6 +24,8 @@ const HISTORY_PATH = path.join(process.cwd(), 'scripts', 'history.json');
 const LOGS_DIR = path.join(process.cwd(), 'logs');
 const VALID_PRICING = ['free', 'freemium', 'paid'];
 const LOOKBACK_HOURS = 48;
+const MAX_ARTICLES_PER_FEED = 15;
+const GLOBAL_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes hard limit
 
 const parser = new Parser({
   timeout: 15000,
@@ -153,10 +155,14 @@ function validateCategory(category, fallback) {
 // ─── Full Text Extraction ────────────────────────────────────────
 async function extractFullText(url) {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     const article = await extract(url, {
-      timeout: 10000,
+      timeout: 8000,
+      signal: controller.signal,
       headers: { 'User-Agent': 'AINewsArabic/2.0' },
     });
+    clearTimeout(timeout);
     if (article?.content) {
       // Strip HTML tags, keep text
       const text = article.content
@@ -213,6 +219,9 @@ async function fetchRecentArticles(history) {
           defaultCategory: feed.categoryDefault,
         });
         feedCount++;
+
+        // Cap articles per feed to prevent runaway processing
+        if (feedCount >= MAX_ARTICLES_PER_FEED) break;
       }
 
       log('info', `  ✓ ${feed.name}: ${feedCount} مقال جديد`);
@@ -576,4 +585,11 @@ async function main() {
   }
 }
 
-main();
+// ─── Global Timeout Safety Net ────────────────────────────────────
+const globalTimeout = setTimeout(() => {
+  console.error('❌ Global timeout reached (' + (GLOBAL_TIMEOUT_MS / 60000) + ' min). Forcing exit to prevent GitHub Actions timeout.');
+  process.exit(1);
+}, GLOBAL_TIMEOUT_MS);
+globalTimeout.unref(); // Don't prevent process exit if main finishes
+
+main().finally(() => clearTimeout(globalTimeout));
