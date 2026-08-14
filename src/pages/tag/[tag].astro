@@ -11,7 +11,10 @@ export async function getStaticPaths() {
   const toolTags = allTools.flatMap((t) => t.data.tags || []);
   const uniqueTags = Array.from(new Set([...newsTags, ...toolTags]));
 
-  return uniqueTags.map((tag) => ({
+  // Filter out tags that contain "/" — they break single-segment dynamic routes
+  const safeTags = uniqueTags.filter((tag) => !tag.includes('/'));
+
+  return safeTags.map((tag) => ({
     params: { tag },
     props: { tag },
   }));

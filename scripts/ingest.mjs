@@ -453,7 +453,7 @@ async function saveNewsFiles(newsList, history) {
 title: ${JSON.stringify(item.title)}
 summary: ${JSON.stringify(item.summary)}
 category: ${JSON.stringify(category)}
-tags: ${JSON.stringify(item.tags || [])}
+tags: ${JSON.stringify((item.tags || []).map(t => t.replace(/\//g, '-')))}
 sourceName: ${JSON.stringify(item.sourceName)}
 sourceUrl: ${JSON.stringify(sourceUrl)}
 publishedAt: ${JSON.stringify(item.publishedAt || new Date().toISOString())}
@@ -520,7 +520,7 @@ description: ${JSON.stringify(tool.description)}
 category: ${JSON.stringify(category)}
 url: ${JSON.stringify(url)}
 pricing: ${JSON.stringify(pricing)}
-tags: ${JSON.stringify(tool.tags || [])}
+tags: ${JSON.stringify((tool.tags || []).map(t => t.replace(/\//g, '-')))}
 addedAt: ${JSON.stringify(new Date().toISOString())}
 ---
 
