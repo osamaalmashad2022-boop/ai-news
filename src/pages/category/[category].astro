@@ -3,20 +3,10 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import NewsCard from '../../components/NewsCard.astro';
 import CategoryFilter from '../../components/CategoryFilter.astro';
+import { CATEGORIES } from '../../shared/constants.mjs';
 
 export async function getStaticPaths() {
-  const categories = [
-    'نماذج لغوية',
-    'توليد الصور والفيديو',
-    'الصوت',
-    'البرمجة',
-    'الأبحاث',
-    'الأعمال والتمويل',
-    'السياسات والأخلاقيات',
-    'أدوات وتطبيقات'
-  ];
-
-  return categories.map((cat) => ({
+  return CATEGORIES.map((cat) => ({
     params: { category: cat },
     props: { category: cat },
   }));
@@ -41,11 +31,11 @@ const filteredNews = allNews
     </div>
 
     <!-- Category Filter Bar -->
-    <CategoryFilter activeCategory={category} />
+    <CategoryFilter activeCategory={category} target=".news-grid" />
 
     <!-- Grid -->
     {filteredNews.length > 0 ? (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+      <div class="news-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
         {filteredNews.map((newsItem) => (
           <NewsCard news={newsItem} />
         ))}
@@ -57,3 +47,4 @@ const filteredNews = allNews
     )}
   </div>
 </BaseLayout>
+

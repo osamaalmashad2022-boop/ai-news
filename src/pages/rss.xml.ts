@@ -2,6 +2,15 @@ import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 export async function GET(context: APIContext) {
   const news = await getCollection('news');
   const sortedNews = news.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
@@ -15,8 +24,9 @@ export async function GET(context: APIContext) {
       pubDate: item.data.publishedAt,
       description: item.data.summary,
       link: `/news/${item.slug}/`,
-      customData: `<sourceUrl>${item.data.sourceUrl}</sourceUrl><sourceName>${item.data.sourceName}</sourceName><category>${item.data.category}</category>`,
+      customData: `<sourceUrl>${escapeXml(item.data.sourceUrl)}</sourceUrl><sourceName>${escapeXml(item.data.sourceName)}</sourceName><category>${escapeXml(item.data.category)}</category>`,
     })),
     customData: `<language>ar</language>`,
   });
 }
+

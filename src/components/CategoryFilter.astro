@@ -1,4 +1,6 @@
 ---
+import { CATEGORIES } from '../shared/constants.mjs';
+
 interface Props {
   activeCategory?: string;
   target?: string; // CSS selector of the grid container to filter
@@ -6,17 +8,7 @@ interface Props {
 
 const { activeCategory = 'الكل', target = '.news-grid' } = Astro.props;
 
-const categories = [
-  'الكل',
-  'نماذج لغوية',
-  'توليد الصور والفيديو',
-  'الصوت',
-  'البرمجة',
-  'الأبحاث',
-  'الأعمال والتمويل',
-  'السياسات والأخلاقيات',
-  'أدوات وتطبيقات'
-];
+const categories = ['الكل', ...CATEGORIES];
 ---
 
 <div class="category-filter flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar py-4" data-target={target}>

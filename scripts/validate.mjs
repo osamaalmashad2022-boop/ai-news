@@ -6,9 +6,8 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { CATEGORIES } from './feeds.mjs';
+import { CATEGORIES, VALID_PRICING } from '../src/shared/constants.mjs';
 
-const VALID_PRICING = ['free', 'freemium', 'paid'];
 const CONTENT_DIR = path.join(process.cwd(), 'src', 'content');
 
 function parseFrontmatter(content) {

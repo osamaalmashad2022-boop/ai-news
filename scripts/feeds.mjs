@@ -21,13 +21,6 @@ export const RSS_FEEDS = [
   { name: "Ben's Bites", url: 'https://bensbites.com/feed', categoryDefault: 'أدوات وتطبيقات' },
 ];
 
-export const CATEGORIES = [
-  'نماذج لغوية',
-  'توليد الصور والفيديو',
-  'الصوت',
-  'البرمجة',
-  'الأبحاث',
-  'الأعمال والتمويل',
-  'السياسات والأخلاقيات',
-  'أدوات وتطبيقات'
-];
+// Re-export from shared constants — single source of truth
+export { CATEGORIES } from '../src/shared/constants.mjs';
+

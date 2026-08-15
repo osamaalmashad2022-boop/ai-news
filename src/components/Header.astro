@@ -27,7 +27,7 @@ const navLinks = [
       </div>
     </a>
 
-    <!-- Navigation Menu -->
+    <!-- Desktop Navigation Menu -->
     <nav class="hidden md:flex items-center gap-1 bg-dark-surface/60 p-1.5 rounded-full border border-dark-border/40">
       {navLinks.map((link) => {
         const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
@@ -68,6 +68,88 @@ const navLinks = [
         </svg>
         <span>اشترك بالنشرة</span>
       </a>
+
+      <!-- Mobile Menu Button -->
+      <button
+        id="mobile-menu-toggle"
+        type="button"
+        class="md:hidden p-2.5 rounded-xl bg-dark-card/80 text-gray-300 hover:text-neon-cyan border border-dark-border/60 hover:border-neon-cyan/40 transition-all duration-200"
+        aria-label="القائمة الرئيسية"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <!-- Hamburger icon -->
+        <svg id="menu-icon-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <!-- Close icon (hidden by default) -->
+        <svg id="menu-icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   </div>
+
+  <!-- Mobile Navigation Panel -->
+  <nav
+    id="mobile-menu"
+    class="md:hidden hidden border-t border-dark-border/40 bg-dark-surface/95 backdrop-blur-xl overflow-hidden transition-all duration-300"
+    style="max-height: 0;"
+  >
+    <div class="px-4 py-4 space-y-1">
+      {navLinks.map((link) => {
+        const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
+        return (
+          <a
+            href={link.href}
+            class={`block px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+              isActive
+                ? 'bg-neon-blue/20 text-neon-cyan border border-neon-cyan/30'
+                : 'text-gray-300 hover:text-white hover:bg-dark-card/60'
+            }`}
+          >
+            {link.name}
+          </a>
+        );
+      })}
+      <a
+        href="#newsletter"
+        class="sm:hidden block px-4 py-3 rounded-xl text-sm font-semibold text-neon-cyan bg-neon-cyan/10 border border-neon-cyan/20 text-center mt-2"
+      >
+        اشترك بالنشرة البريدية
+      </a>
+    </div>
+  </nav>
 </header>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const menu = document.getElementById('mobile-menu');
+    const iconOpen = document.getElementById('menu-icon-open');
+    const iconClose = document.getElementById('menu-icon-close');
+
+    if (!toggle || !menu || !iconOpen || !iconClose) return;
+
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+
+      toggle.setAttribute('aria-expanded', String(!isOpen));
+
+      if (isOpen) {
+        // Close
+        menu.style.maxHeight = '0';
+        setTimeout(() => menu.classList.add('hidden'), 300);
+        iconOpen.classList.remove('hidden');
+        iconClose.classList.add('hidden');
+      } else {
+        // Open
+        menu.classList.remove('hidden');
+        menu.style.maxHeight = menu.scrollHeight + 'px';
+        iconOpen.classList.add('hidden');
+        iconClose.classList.remove('hidden');
+      }
+    });
+  });
+</script>
+
