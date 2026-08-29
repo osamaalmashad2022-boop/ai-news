@@ -870,7 +870,17 @@
     "https://www.producthunt.com/products/publicdesktop-lol",
     "https://www.producthunt.com/products/staats-3",
     "https://www.producthunt.com/products/almanac-5",
-    "https://www.producthunt.com/products/opentag"
+    "https://www.producthunt.com/products/opentag",
+    "https://techcrunch.com/2026/08/29/sony-music-warner-sue-anthropic-alleging-a-brazen-campaign-of-intellectual-property-theft/",
+    "https://the-decoder.com/ai-generated-videos-are-already-displacing-actors-and-livestreamers-across-chinas-entertainment-industry/",
+    "https://techcrunch.com/2026/08/29/nvidias-ai-advantage-is-moving-beyond-the-gpu/",
+    "https://techcrunch.com/2026/08/29/were-not-doing-30-bets-a-year-vijay-pande-on-betting-small-after-running-4-billion-at-a16z/",
+    "https://www.theverge.com/entertainment/985866/h4rris-nihil-young-edm-suno-ai",
+    "https://the-decoder.com/google-gives-ai-agents-their-own-wiki-so-they-can-learn-from-mistakes-and-successes/",
+    "https://the-decoder.com/ai-generated-videos-are-already-displacing-actors-and-livestreamers-across-chinas-entertainment-industry/",
+    "https://the-decoder.com/ai-generated-videos-are-already-displacing-actors-and-livestreamers-across-chinas-entertainment-industry/",
+    "https://www.theverge.com/entertainment/985866/h4rris-nihil-young-edm-suno-ai",
+    "https://the-decoder.com/google-gives-ai-agents-their-own-wiki-so-they-can-learn-from-mistakes-and-successes/"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -1743,7 +1753,17 @@
     "publicdesktop.lol",
     "Staats",
     "Almanac",
-    "OpenTag"
+    "OpenTag",
+    "شركتا سوني ووارنر تُقاضيان أنثروبيك بتهمة انتهاك حقوق الملكية الفكرية لتطوير Claude",
+    "الفيديو المولد بالذكاء الاصطناعي يستبدل الممثلين والمذيعين في صناعة الترفيه الصينية",
+    "تفوق إنفيديا في الذكاء الاصطناعي يتجاوز معالجات GPU إلى البنية التحتية والتنسيق",
+    "فيجاي باندي يؤسس صندوق VZVC للاستثمار التركيزي المدعوم بالذكاء الاصطناعي",
+    "صناع الموسيقى يقودون حملات لكشف وتتبع محتوى الصوت المولد بالذكاء الاصطناعي",
+    "جوجل تبتكر نظام WikiSkill لمنح وكلاء الذكاء الاصطناعي ذاكرة تراكمية للتعلم من الأخطاء",
+    "Seedance",
+    "Wan 3.0",
+    "Suno AI",
+    "WikiSkill"
   ],
-  "lastRunAt": "2026-08-29T11:27:58.822Z"
+  "lastRunAt": "2026-08-29T19:38:52.060Z"
 }
