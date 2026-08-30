@@ -903,7 +903,14 @@
     "https://www.producthunt.com/products/superagent-a-home-for-your-ai-agents",
     "https://www.producthunt.com/products/omlx",
     "https://www.producthunt.com/products/maritime",
-    "https://www.producthunt.com/products/prequel-2"
+    "https://www.producthunt.com/products/prequel-2",
+    "https://www.marktechpost.com/2026/08/30/google-ai-introduces-envharness-a-programmable-layer-that-turns-static-agent-environments-into-adaptive-training-worlds/",
+    "https://the-decoder.com/the-skills-that-earn-top-grades-are-the-ones-ai-can-fake-best/",
+    "https://www.marktechpost.com/2026/08/30/lowest-latency-inference-apis-for-voice-and-realtime-agents-a-time-to-first-token-ttft-first-benchmark/",
+    "https://www.theverge.com/tech/986167/china-humanoid-robot-games-race",
+    "https://arstechnica.com/tech-policy/2026/08/i-asked-100-companies-for-my-data-some-deleted-it-instead/",
+    "https://www.marktechpost.com/2026/08/30/google-ai-introduces-envharness-a-programmable-layer-that-turns-static-agent-environments-into-adaptive-training-worlds/",
+    "https://www.marktechpost.com/2026/08/29/building-custom-batched-ensemble-weather-forecasting-with-nvidia-earth2studio/"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -1809,7 +1816,14 @@
     "Superagent",
     "oMLX",
     "Maritime",
-    "Prequel"
+    "Prequel",
+    "غوغل تعلن عن إطار EnvHarness لتحويل بيئات تقييم الوكلاء إلى عوالم تدريب تكيفية",
+    "دراسة أكاديمية تكشف عن تأثير نماذج الذكاء الاصطناعي على أداء الطلاب والتفكير السببي",
+    "تقرير تقني يسلط الضوء على أهمية قياس زمن توليد أول جملة في تطبيقات الوكلاء الصوتية",
+    "تواصل فعاليات ألعاب الروبوتات البشرية العالمية في بكين وسط منافسات متقدمة",
+    "تحقيق صحفي يعري واقع الخصوصية: طلبات الوصول للبيانات تنتهي بالتخبط وحذف الحسابات لدى عشرات الشركات",
+    "EnvHarness",
+    "NVIDIA Earth2Studio"
   ],
-  "lastRunAt": "2026-08-30T19:41:50.177Z"
+  "lastRunAt": "2026-08-30T22:12:02.956Z"
 }
