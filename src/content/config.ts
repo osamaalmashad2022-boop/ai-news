@@ -1,14 +1,20 @@
 import { defineCollection, z } from 'astro:content';
-import { CATEGORIES } from '../shared/constants.mjs';
-
-const categoryEnum = z.enum(CATEGORIES as [string, ...string[]]);
 
 const newsCollection = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
     summary: z.string(),
-    category: categoryEnum,
+    category: z.enum([
+      'نماذج لغوية',
+      'توليد الصور والفيديو',
+      'الصوت',
+      'البرمجة',
+      'الأبحاث',
+      'الأعمال والتمويل',
+      'السياسات والأخلاقيات',
+      'أدوات وتطبيقات'
+    ]),
     tags: z.array(z.string()).default([]),
     sourceName: z.string(),
     sourceUrl: z.string().url(),
@@ -24,7 +30,16 @@ const toolsCollection = defineCollection({
   schema: z.object({
     name: z.string(),
     description: z.string(),
-    category: categoryEnum,
+    category: z.enum([
+      'نماذج لغوية',
+      'توليد الصور والفيديو',
+      'الصوت',
+      'البرمجة',
+      'الأبحاث',
+      'الأعمال والتمويل',
+      'السياسات والأخلاقيات',
+      'أدوات وتطبيقات'
+    ]),
     url: z.string().url(),
     pricing: z.enum(['free', 'freemium', 'paid']),
     tags: z.array(z.string()).default([]),
@@ -38,4 +53,3 @@ export const collections = {
   news: newsCollection,
   tools: toolsCollection,
 };
-

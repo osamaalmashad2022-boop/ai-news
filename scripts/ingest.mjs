@@ -14,7 +14,6 @@ import { GoogleGenAI } from '@google/genai';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { RSS_FEEDS, CATEGORIES } from './feeds.mjs';
-import { VALID_PRICING } from '../src/shared/constants.mjs';
 import { SYSTEM_PROMPT } from './prompt.mjs';
 
 // ─── Configuration ───────────────────────────────────────────────
@@ -23,6 +22,7 @@ const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 1000;
 const HISTORY_PATH = path.join(process.cwd(), 'scripts', 'history.json');
 const LOGS_DIR = path.join(process.cwd(), 'logs');
+const VALID_PRICING = ['free', 'freemium', 'paid'];
 const LOOKBACK_HOURS = 48;
 const MAX_ARTICLES_PER_FEED = 15;
 const GLOBAL_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes hard limit
@@ -73,15 +73,9 @@ async function saveLog() {
 async function loadHistory() {
   try {
     const raw = await fs.readFile(HISTORY_PATH, 'utf-8');
-    const history = JSON.parse(raw);
-    // Pre-build lookup Sets for O(1) deduplication
-    history._urlSet = new Set(history.processedUrls);
-    history._titleSet = new Set(
-      (history.processedTitles || []).map(normalizeTitle)
-    );
-    return history;
+    return JSON.parse(raw);
   } catch {
-    return { processedUrls: [], processedTitles: [], lastRunAt: null, _urlSet: new Set(), _titleSet: new Set() };
+    return { processedUrls: [], processedTitles: [], lastRunAt: null };
   }
 }
 
@@ -90,9 +84,7 @@ async function saveHistory(history) {
   history.processedUrls = history.processedUrls.slice(-2000);
   history.processedTitles = history.processedTitles.slice(-2000);
   history.lastRunAt = new Date().toISOString();
-  // Strip internal Sets before serializing
-  const { _urlSet, _titleSet, ...serializable } = history;
-  await fs.writeFile(HISTORY_PATH, JSON.stringify(serializable, null, 2), 'utf-8');
+  await fs.writeFile(HISTORY_PATH, JSON.stringify(history, null, 2), 'utf-8');
 }
 
 function normalizeTitle(title) {
@@ -104,8 +96,11 @@ function normalizeTitle(title) {
 }
 
 function isDuplicate(history, url, title) {
-  if (history._urlSet.has(url)) return true;
-  return history._titleSet.has(normalizeTitle(title));
+  if (history.processedUrls.includes(url)) return true;
+  const normalized = normalizeTitle(title);
+  return history.processedTitles.some(
+    (t) => normalizeTitle(t) === normalized
+  );
 }
 
 // ─── Retry Helper ────────────────────────────────────────────────
@@ -127,7 +122,7 @@ async function withRetry(fn, label, retries = MAX_RETRIES) {
 
 // ─── Slug Generation (Arabic-aware) ─────────────────────────────
 function sanitizeSlug(text) {
-  const base = text
+  return text
     .toLowerCase()
     // Transliterate common Arabic chars to latin for URL-safety
     .replace(/[\u0600-\u06FF]+/g, (match) => {
@@ -138,9 +133,7 @@ function sanitizeSlug(text) {
     .replace(/[\s_]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 55) || 'item';
-  // Append short timestamp suffix to prevent slug collisions
-  return `${base}-${Date.now().toString(36).slice(-4)}`;
+    .slice(0, 60) || `item-${Date.now()}`;
 }
 
 // ─── Category Validation ─────────────────────────────────────────
@@ -460,7 +453,7 @@ async function saveNewsFiles(newsList, history) {
 title: ${JSON.stringify(item.title)}
 summary: ${JSON.stringify(item.summary)}
 category: ${JSON.stringify(category)}
-tags: ${JSON.stringify((item.tags || []).map(t => t.replace(/\//g, '-')))}
+tags: ${JSON.stringify(item.tags || [])}
 sourceName: ${JSON.stringify(item.sourceName)}
 sourceUrl: ${JSON.stringify(sourceUrl)}
 publishedAt: ${JSON.stringify(item.publishedAt || new Date().toISOString())}
@@ -527,7 +520,7 @@ description: ${JSON.stringify(tool.description)}
 category: ${JSON.stringify(category)}
 url: ${JSON.stringify(url)}
 pricing: ${JSON.stringify(pricing)}
-tags: ${JSON.stringify((tool.tags || []).map(t => t.replace(/\//g, '-')))}
+tags: ${JSON.stringify(tool.tags || [])}
 addedAt: ${JSON.stringify(new Date().toISOString())}
 ---
 
