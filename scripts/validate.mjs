@@ -6,9 +6,8 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { CATEGORIES } from './feeds.mjs';
+import { CATEGORIES, VALID_PRICING } from '../src/shared/constants.mjs';
 
-const VALID_PRICING = ['free', 'freemium', 'paid'];
 const CONTENT_DIR = path.join(process.cwd(), 'src', 'content');
 
 function parseFrontmatter(content) {
@@ -107,6 +106,7 @@ async function validateTools() {
   const toolsDir = path.join(CONTENT_DIR, 'tools');
   const files = await collectFiles(toolsDir);
   const errors = [];
+  const seenNames = new Map();
 
   for (const file of files) {
     const content = await fs.readFile(file, 'utf-8');
@@ -122,6 +122,19 @@ async function validateTools() {
     for (const field of ['name', 'description', 'category', 'url', 'pricing']) {
       if (!fm[field]) {
         errors.push({ file: rel, error: `الحقل المطلوب مفقود: ${field}` });
+      }
+    }
+
+    // Duplicate name check
+    if (fm.name && typeof fm.name === 'string') {
+      const norm = fm.name.toLowerCase().replace(/[^\w\u0600-\u06FF]/g, '').replace(/\s+/g, '').trim();
+      if (seenNames.has(norm)) {
+        errors.push({
+          file: rel,
+          error: `أداة مكررة: الاسم "${fm.name}" موجود مسبقاً في الملف "${seenNames.get(norm)}"`,
+        });
+      } else {
+        seenNames.set(norm, rel);
       }
     }
 

@@ -3,20 +3,10 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import NewsCard from '../../components/NewsCard.astro';
 import CategoryFilter from '../../components/CategoryFilter.astro';
+import { CATEGORIES } from '../../shared/constants.mjs';
 
 export async function getStaticPaths() {
-  const categories = [
-    'نماذج لغوية',
-    'توليد الصور والفيديو',
-    'الصوت',
-    'البرمجة',
-    'الأبحاث',
-    'الأعمال والتمويل',
-    'السياسات والأخلاقيات',
-    'أدوات وتطبيقات'
-  ];
-
-  return categories.map((cat) => ({
+  return CATEGORIES.map((cat) => ({
     params: { category: cat },
     props: { category: cat },
   }));

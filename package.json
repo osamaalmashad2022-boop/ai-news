@@ -11,6 +11,7 @@
     "ingest": "node scripts/ingest.mjs",
     "ingest:dry": "node scripts/ingest.mjs --dry-run",
     "validate": "node scripts/validate.mjs",
+    "dedupe:tools": "node scripts/dedupe-tools.mjs",
     "cleanup": "node scripts/cleanup.mjs",
     "cleanup:dry": "node scripts/cleanup.mjs --dry-run"
   },

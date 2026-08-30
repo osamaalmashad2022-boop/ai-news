@@ -4,7 +4,7 @@ description: "وكيل برمجي ذكي يعمل تلقائياً على تحل
 category: "البرمجة"
 url: "https://techcrunch.com/2026/08/12/blacksmiths-valuation-jumps-10x-to-550m-as-ai-coding-fuels-software-validation/"
 pricing: "paid"
-tags: ["AI Agent","Code Validation","CI/CD","البرمجة"]
+tags: ["AI Agent","Code Validation","CI-CD","البرمجة"]
 addedAt: "2026-08-12T18:02:02.374Z"
 ---
 

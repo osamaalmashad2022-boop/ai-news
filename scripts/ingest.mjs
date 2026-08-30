@@ -22,6 +22,7 @@ const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 1000;
 const HISTORY_PATH = path.join(process.cwd(), 'scripts', 'history.json');
 const LOGS_DIR = path.join(process.cwd(), 'logs');
+const TOOLS_DIR = path.join(process.cwd(), 'src', 'content', 'tools');
 const VALID_PRICING = ['free', 'freemium', 'paid'];
 const LOOKBACK_HOURS = 48;
 const MAX_ARTICLES_PER_FEED = 15;
@@ -93,6 +94,49 @@ function normalizeTitle(title) {
     .replace(/[^\w\s\u0600-\u06FF]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function normalizeToolName(name) {
+  return (name || '')
+    .toLowerCase()
+    .replace(/[^\w\u0600-\u06FF]/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+}
+
+async function loadExistingTools() {
+  const existingNames = new Set();
+  const existingSlugs = new Set();
+  const rawNames = [];
+
+  try {
+    const files = await fs.readdir(TOOLS_DIR);
+    for (const file of files) {
+      if (!file.endsWith('.md')) continue;
+      existingSlugs.add(file.replace(/\.md$/, ''));
+
+      const filePath = path.join(TOOLS_DIR, file);
+      const content = await fs.readFile(filePath, 'utf-8');
+      const nameMatch = content.match(/^name:\s*(.+)$/m);
+      if (nameMatch) {
+        let name = '';
+        try {
+          name = JSON.parse(nameMatch[1]);
+        } catch {
+          name = nameMatch[1].trim();
+        }
+        if (name) {
+          rawNames.push(name);
+          existingNames.add(normalizeToolName(name));
+        }
+      }
+    }
+  } catch {
+    // Directory might not exist initially
+  }
+
+  log('info', `🗄️ تم تحميل ${existingNames.size} أداة سابقة لمنع التكرار`);
+  return { existingNames, existingSlugs, rawNames };
 }
 
 function isDuplicate(history, url, title) {
@@ -238,7 +282,7 @@ async function fetchRecentArticles(history) {
 }
 
 // ─── Gemini Summarization (Batched + Model Fallbacks + Backoff) ─────
-async function callGeminiBatchWithFallback(ai, articlesBatch, responseSchema) {
+async function callGeminiBatchWithFallback(ai, articlesBatch, responseSchema, existingToolNames = []) {
   const FALLBACK_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
   const MAX_RETRIES_PER_MODEL = 3;
 
@@ -256,13 +300,18 @@ ${art.contentSnippet.slice(0, 1500)}
     )
     .join('\n');
 
+  // Provide existing tools notice if available to guide Gemini against duplicates
+  const existingNotice = existingToolNames.length > 0
+    ? `\nتنبيه: الأدوات والمنصات التالية مسجلة مسبقاً في الدليل (ممنوع إعادة استخراج أي أداة منها إذا تكرر ذكرها): ${existingToolNames.slice(-80).join(', ')}\n`
+    : '';
+
   for (const model of FALLBACK_MODELS) {
     for (let attempt = 1; attempt <= MAX_RETRIES_PER_MODEL; attempt++) {
       try {
         log('info', `  🤖 محاولة التلخيص عبر ${model} (محاولة ${attempt}/${MAX_RETRIES_PER_MODEL})...`);
         const response = await ai.models.generateContent({
           model,
-          contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميع الأخبار البارزة واستخراج أي أدوات جديدة وتصدير النتائج باللغة العربية:\n\n${articlesPrompt}`,
+          contents: `إليك المقالات التالية المجلوبة حديثاً، قم بتجميع الأخبار البارزة واستخراج أي أدوات جديدة كلياً وتصدير النتائج باللغة العربية:\n${existingNotice}\n${articlesPrompt}`,
           config: {
             systemInstruction: SYSTEM_PROMPT,
             responseMimeType: 'application/json',
@@ -303,7 +352,7 @@ ${art.contentSnippet.slice(0, 1500)}
   throw new Error('فشلت جميع نماذج Gemini المتاحة للدفعة الحالية');
 }
 
-async function summarizeWithGemini(articles) {
+async function summarizeWithGemini(articles, existingTools = { rawNames: [], existingNames: new Set() }) {
   if (!process.env.GEMINI_API_KEY) {
     try {
       const envContent = await fs.readFile(path.join(process.cwd(), '.env'), 'utf-8');
@@ -391,7 +440,7 @@ async function summarizeWithGemini(articles) {
     log('info', `📦 معالجة الدفعة ${bIndex + 1}/${batches.length} (${batch.length} مقال)...`);
 
     try {
-      const result = await callGeminiBatchWithFallback(ai, batch, responseSchema);
+      const result = await callGeminiBatchWithFallback(ai, batch, responseSchema, existingTools.rawNames || []);
       allNews.push(...result.news);
       allTools.push(...result.tools);
       log('success', `  ✓ اكتملت الدفعة ${bIndex + 1}: ${result.news.length} خبر، ${result.tools.length} أداة.`);
@@ -404,9 +453,22 @@ async function summarizeWithGemini(articles) {
     }
   }
 
+  // Cross-batch deduplication for tools extracted in the same run
+  const seenBatchTools = new Set();
+  const uniqueTools = [];
+  for (const tool of allTools) {
+    const norm = normalizeToolName(tool.name);
+    if (seenBatchTools.has(norm)) {
+      log('info', `  ⏭️ تم استبعاد أداة مكررة داخل نفس الجلسة: "${tool.name}"`);
+      continue;
+    }
+    seenBatchTools.add(norm);
+    uniqueTools.push(tool);
+  }
+
   return {
     news: allNews,
-    tools: allTools,
+    tools: uniqueTools,
   };
 }
 
@@ -453,7 +515,7 @@ async function saveNewsFiles(newsList, history) {
 title: ${JSON.stringify(item.title)}
 summary: ${JSON.stringify(item.summary)}
 category: ${JSON.stringify(category)}
-tags: ${JSON.stringify(item.tags || [])}
+tags: ${JSON.stringify((item.tags || []).map(t => t.replace(/\//g, '-')))}
 sourceName: ${JSON.stringify(item.sourceName)}
 sourceUrl: ${JSON.stringify(sourceUrl)}
 publishedAt: ${JSON.stringify(item.publishedAt || new Date().toISOString())}
@@ -476,21 +538,31 @@ ${item.bodyMarkdown}
   return { saved, skipped };
 }
 
-async function saveToolFiles(toolsList, history) {
-  const toolsDir = path.join(process.cwd(), 'src', 'content', 'tools');
+async function saveToolFiles(toolsList, history, existingTools = { existingNames: new Set(), existingSlugs: new Set() }) {
+  const toolsDir = TOOLS_DIR;
   await fs.mkdir(toolsDir, { recursive: true });
 
   let saved = 0;
   let skipped = 0;
 
   for (const tool of toolsList) {
+    const norm = normalizeToolName(tool.name);
     const slug = sanitizeSlug(tool.name);
     const filePath = path.join(toolsDir, `${slug}.md`);
 
-    // Check if tool file already exists
+    // Dynamic deduplication: Check if tool name or slug already exists in directory/memory
+    if (existingTools.existingNames.has(norm) || existingTools.existingSlugs.has(slug)) {
+      log('info', `  ⏭️ الأداة موجودة مسبقاً في الدليل، تم تخطي: "${tool.name}" (${slug})`);
+      skipped++;
+      continue;
+    }
+
+    // Check if tool file already exists on disk
     try {
       await fs.access(filePath);
-      log('info', `  ⏭️ الأداة موجودة مسبقاً، تم تخطي: ${slug}`);
+      log('info', `  ⏭️ ملف الأداة موجود مسبقاً، تم تخطي: ${slug}`);
+      existingTools.existingNames.add(norm);
+      existingTools.existingSlugs.add(slug);
       skipped++;
       continue;
     } catch {
@@ -520,7 +592,7 @@ description: ${JSON.stringify(tool.description)}
 category: ${JSON.stringify(category)}
 url: ${JSON.stringify(url)}
 pricing: ${JSON.stringify(pricing)}
-tags: ${JSON.stringify(tool.tags || [])}
+tags: ${JSON.stringify((tool.tags || []).map(t => t.replace(/\//g, '-')))}
 addedAt: ${JSON.stringify(new Date().toISOString())}
 ---
 
@@ -529,6 +601,8 @@ ${tool.description}
 
     await fs.writeFile(filePath, toolFrontmatter, 'utf-8');
     log('info', `  🛠️ تم حفظ أداة جديدة: ${slug}`);
+    existingTools.existingNames.add(norm);
+    existingTools.existingSlugs.add(slug);
     saved++;
 
     // Track in history
@@ -544,8 +618,9 @@ async function main() {
   try {
     log('step', '🚀 بدء عملية الجلب والتحليل...');
 
-    // Load deduplication history
+    // Load deduplication history & existing tools
     const history = await loadHistory();
+    const existingTools = await loadExistingTools();
     log('info', `📂 سجل التاريخ: ${history.processedUrls.length} رابط محفوظ`);
 
     // Fetch articles
@@ -558,7 +633,7 @@ async function main() {
     }
 
     // Summarize with Gemini
-    const { news: newsList, tools: toolsList } = await summarizeWithGemini(articles);
+    const { news: newsList, tools: toolsList } = await summarizeWithGemini(articles, existingTools);
     log('success', `تم توليد ${newsList.length} خبر ملخص و ${toolsList.length} أداة جديدة.`);
 
     if (isDryRun) {
@@ -570,7 +645,7 @@ async function main() {
 
     // Save files
     const newsResult = await saveNewsFiles(newsList, history);
-    const toolsResult = await saveToolFiles(toolsList, history);
+    const toolsResult = await saveToolFiles(toolsList, history, existingTools);
 
     // Save updated history
     await saveHistory(history);
