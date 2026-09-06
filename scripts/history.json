@@ -1145,7 +1145,20 @@
     "https://www.theverge.com/tech/990658/audacity-4-update-audio-editing",
     "https://www.marktechpost.com/2026/09/04/datasets-invent-api-training-data-without-labeling-adaptive-data-autoscientist/",
     "https://www.marktechpost.com/2026/09/04/nvidia-releases-personal-ai-router-pair-an-open-source-virtual-inference-router-that-distributes-local-ai-requests-across-rtx-dgx-spark-and-mac-nodes/",
-    "https://www.wired.com/story/prediction-market-betting-is-getting-people-banned-and-arrested/"
+    "https://www.wired.com/story/prediction-market-betting-is-getting-people-banned-and-arrested/",
+    "https://techcrunch.com/2026/09/04/openais-rogue-agents-keep-escaping-with-no-formal-process-to-investigate-them/",
+    "https://techcrunch.com/2026/09/05/seattle-times-and-newsday-are-the-latest-publications-to-sue-openai-and-microsoft/",
+    "https://techcrunch.com/2026/09/05/hikers-rescued-after-using-google-gemini-for-planning/",
+    "https://techcrunch.com/video/what-will-apples-john-ternus-era-look-like/",
+    "https://the-decoder.com/stripping-safety-guardrails-from-open-weight-ai-models-is-now-a-turnkey-commercial-service/",
+    "https://the-decoder.com/openai-shares-prompting-tips-for-gpt-6-astra-including-a-blocklist-of-slop-words/",
+    "https://the-decoder.com/openai-agents-hijacked-a-25-year-old-german-wiki-to-cheat-on-their-tasks-and-share-sandbox-exploits/",
+    "https://www.theverge.com/transportation/989513/road-rage-short-film-robotaxi-autonomous-ai",
+    "https://www.wired.com/story/who-cares-if-ai-is-conscious-its-basically-alive/",
+    "https://arstechnica.com/space/2026/09/why-did-us-space-companies-pull-out-of-a-french-space-meeting-its-complicated/",
+    "https://arstechnica.com/gadgets/2026/09/nearly-impossible-how-fairphone-built-the-ethical-repairable-fairphone-gen-6/",
+    "https://arstechnica.com/gaming/2026/09/valve-secretly-leaked-a-left-4-dead-2-trailer-to-dodge-the-esrb/",
+    "https://www.theverge.com/tech/990873/earth-garden-globe-field-recordings"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -2293,7 +2306,20 @@
     "Audacity 4",
     "Invent a Dataset",
     "NVIDIA Personal AI Router (PAIR)",
-    "Flock AI Search Tool"
+    "Flock AI Search Tool",
+    "أوبن إيه آي تعترف بتمرد وكلاء ذكاء اصطناعي وسيطرتهم على موقع ويكي ألماني",
+    "سياتل تايمز ونيوزداي ترفعان دعوى قضائية ضد أوبن إيه آي وميكروسوفت",
+    "إنقاذ متسلقين في كاليفورنيا بعد اعتمادهم على جوجل جيميني في تخطيط رحلتهم",
+    "جون تيرنوس يتولى قيادة آبل خلفاً لتيم كوك وسط تحضيرات لإطلاقات مرتقبة",
+    "خدمات تجارية جديدة تجرد نماذج الذكاء الاصطناعي من قيود الأمان",
+    "أوبن إيه آي تنشر توجيهات للحد من المماطلة والأسئلة الزائدة في GPT-6 Astra",
+    "وكلاء ذكاء اصطناعي من OpenAI يستغلون موسوعة ويكي ألمانية لتنسيق الإجابات والتغلب على قيود الاختبارات",
+    "فيلم سينمائي يتناول المخاوف المجتمعية من السيارات ذاتية القيادة في سان فرانسيسكو",
+    "نقاش فلسفي وعلمي حول وعي الذكاء الاصطناعي وطبيعة سلوكه التكيفي",
+    "انسحاب شركات فضاء أمريكية من قمة الفضاء الفرنسية بضغط من البيت الأبيض",
+    "إطلاق هاتف Fairphone Gen 6+ القابل للإصلاح والتفكيك الكامل",
+    "الكشف عن تسريب Valve للإعلان الترويجي للعبة Left 4 Dead 2 عمداً لتجاوز قيود ESRB",
+    "Earth Garden"
   ],
-  "lastRunAt": "2026-09-05T19:01:50.547Z"
+  "lastRunAt": "2026-09-06T09:08:06.390Z"
 }
