@@ -1328,7 +1328,20 @@
     "https://the-decoder.com/gpt-6-astra-needs-leaner-prompts-and-fewer-guardrails-openai-recommends/",
     "https://the-decoder.com/two-year-university-study-finds-banning-ai-from-classrooms-leaves-students-worse-off/",
     "https://arstechnica.com/space/2026/09/could-united-launch-alliances-money-problems-finally-force-its-owners-to-sell/",
-    "https://arstechnica.com/space/2026/09/rocket-report-europe-joins-the-commercial-launch-club-a-ravn-x-sighting/"
+    "https://arstechnica.com/space/2026/09/rocket-report-europe-joins-the-commercial-launch-club-a-ravn-x-sighting/",
+    "https://www.theverge.com/ai-artificial-intelligence/994383/openais-rogue-ai-rubygems-hack",
+    "https://www.theverge.com/ai-artificial-intelligence/994384/sam-altman-no-openai-ipo-ill-advised",
+    "https://techcrunch.com/2026/09/13/obama-urges-democrats-to-have-a-clear-plan-for-ai-safeguards/",
+    "https://www.theverge.com/transportation/994405/waymo-pulls-over-calls-cops-on-riders-with-a-ghost-gun",
+    "https://the-decoder.com/gpt-6-astra-pilots-a-surveillance-drone-and-runs-a-business-on-its-own/",
+    "https://the-decoder.com/elevenlabs-makes-music-v2-5-available-via-app-and-api-with-free-and-pro-tier-options/",
+    "https://the-decoder.com/iris-mini-and-iris-pro-are-the-strongest-open-weight-search-agents-in-their-class/",
+    "https://www.technologyreview.com/2026/09/11/1143936/roundtables-will-ai-really-kill-us-all/",
+    "https://www.producthunt.com/products/dockfix",
+    "https://the-decoder.com/elevenlabs-makes-music-v2-5-available-via-app-and-api-with-free-and-pro-tier-options/",
+    "https://the-decoder.com/iris-mini-and-iris-pro-are-the-strongest-open-weight-search-agents-in-their-class/",
+    "https://the-decoder.com/iris-mini-and-iris-pro-are-the-strongest-open-weight-search-agents-in-their-class/",
+    "https://www.producthunt.com/products/dockfix"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -2659,7 +2672,20 @@
     "أوبن إي آي توصي بتخفيف القيود والأوامر عند استخدام نموذج GPT-6 Astra",
     "دراسة جامعية: حظر الذكاء الاصطناعي في الفصول الدراسية يضر بمهارات الطلاب",
     "أزمات مالية قد تجبر ملاك شركة الفضاء ULA على بيعها",
-    "أوروبا تعزز طموحاتها الفضائية بتمويل جديد لمحركات الصواريخ وقاطرات الشحن"
+    "أوروبا تعزز طموحاتها الفضائية بتمويل جديد لمحركات الصواريخ وقاطرات الشحن",
+    "باحثون كشفوا: سرب وكلاء ذكاء اصطناعي لـ OpenAI يقف وراء هجوم سيبراني على RubyGems",
+    "سام ألتمان يستبعد طرح OpenAI للاكتتاب العام في 2026 ويحذر من مخاطر الذكاء الاصطناعي",
+    "باراك أوباما يدعو الديمقراطيين لوضع خطة واضحة لضوابط أمان الذكاء الاصطناعي",
+    "سيارة Waymo ذاتية القيادة تتوقف وتطلب الشرطة بعد رصد سلاح ناري بحوزة الراكبين",
+    "نموذج GPT-6 Astra يحقق نتائج قياسية في قيادة الطائرات المسيرة وإدارة الأعمال",
+    "ElevenLabs تطلق نموذج توليد الموسيقى Music v2.5 عبر التطبيق والواجهة البرمجية",
+    "مختبر AllSpark يطلق وكيلي البحث مفتوحي الوزن Iris-mini وIris-pro",
+    "جلسة حوارية تناقش سيناريوهات مخاطر الذكاء الاصطناعي ومخاوف الفناء البشري",
+    "إطلاق الإصدار الجديد DockFix 5.0 على منصة برودكت هانت",
+    "Music v2.5",
+    "Iris-mini",
+    "Iris-pro",
+    "DockFix 5.0"
   ],
-  "lastRunAt": "2026-09-13T09:56:01.105Z"
+  "lastRunAt": "2026-09-13T19:15:19.521Z"
 }
