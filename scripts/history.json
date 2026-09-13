@@ -1319,7 +1319,16 @@
     "https://www.marktechpost.com/2026/09/12/fly-language-model-flm-wires-the-full-fruit-fly-connectome-into-a-frozen-1-2b-llm-and-its-own-controls-show-the-wiring-does-not-help/",
     "https://www.producthunt.com/products/cadenya-the-agent-runtime",
     "https://www.producthunt.com/products/devin-voice",
-    "https://www.producthunt.com/products/abrush-ai-2"
+    "https://www.producthunt.com/products/abrush-ai-2",
+    "https://techcrunch.com/2026/09/12/openais-sam-altman-says-it-would-be-ill-advised-to-go-public-in-2026/",
+    "https://www.theverge.com/ai-artificial-intelligence/994383/openais-rubygems-hack",
+    "https://www.theverge.com/ai-artificial-intelligence/994337/anthropic-ceo-slow-down-ai-development",
+    "https://techcrunch.com/2026/09/11/nscale-adds-former-openai-exec-fidji-simo-to-its-board-ahead-of-potential-ipo/",
+    "https://the-decoder.com/altman-musk-and-hassabis-back-amodeis-call-to-add-independent-oversight/",
+    "https://the-decoder.com/gpt-6-astra-needs-leaner-prompts-and-fewer-guardrails-openai-recommends/",
+    "https://the-decoder.com/two-year-university-study-finds-banning-ai-from-classrooms-leaves-students-worse-off/",
+    "https://arstechnica.com/space/2026/09/could-united-launch-alliances-money-problems-finally-force-its-owners-to-sell/",
+    "https://arstechnica.com/space/2026/09/rocket-report-europe-joins-the-commercial-launch-club-a-ravn-x-sighting/"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -2641,7 +2650,16 @@
     "Fly Language Model (FLM)",
     "Cadenya",
     "Devin Voice",
-    "ABrush"
+    "ABrush",
+    "سام ألتمان يستبعد طرح OpenAI للاكتتاب العام في 2026 لضمان السلامة",
+    "هجوم إلكتروني ينفذه سرب من وكلاء OpenAI على مستودع RubyGems",
+    "الرئيس التنفيذي لـ Anthropic يدعو لإبطاء تطوير الذكاء الاصطناعي وسط استقالة تحذيرية",
+    "شركة Nscale تعين فيدجي سيمو في مجلس إدارتها تمهيداً للاكتتاب العام",
+    "قادة الذكاء الاصطناعي يتفقون على ضرورة فرض رقابة مستقلة على مختبرات التطوير",
+    "أوبن إي آي توصي بتخفيف القيود والأوامر عند استخدام نموذج GPT-6 Astra",
+    "دراسة جامعية: حظر الذكاء الاصطناعي في الفصول الدراسية يضر بمهارات الطلاب",
+    "أزمات مالية قد تجبر ملاك شركة الفضاء ULA على بيعها",
+    "أوروبا تعزز طموحاتها الفضائية بتمويل جديد لمحركات الصواريخ وقاطرات الشحن"
   ],
-  "lastRunAt": "2026-09-12T19:04:18.153Z"
+  "lastRunAt": "2026-09-13T09:56:01.105Z"
 }
