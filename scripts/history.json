@@ -1341,7 +1341,20 @@
     "https://the-decoder.com/elevenlabs-makes-music-v2-5-available-via-app-and-api-with-free-and-pro-tier-options/",
     "https://the-decoder.com/iris-mini-and-iris-pro-are-the-strongest-open-weight-search-agents-in-their-class/",
     "https://the-decoder.com/iris-mini-and-iris-pro-are-the-strongest-open-weight-search-agents-in-their-class/",
-    "https://www.producthunt.com/products/dockfix"
+    "https://www.producthunt.com/products/dockfix",
+    "https://www.marktechpost.com/2026/09/13/anthropics-3-step-pace-the-frontier-plan-wins-openai-xai-and-microsoft-support-is-it-too-late-to-slow-ai-down/",
+    "https://www.marktechpost.com/2026/09/14/nvidia-open-sources-osmo-one-yaml-orchestrates-physical-ai-training-simulation-and-robot-testing/",
+    "https://www.marktechpost.com/2026/09/12/cognition-releases-swe-2-a-kimi-k3-post-trained-coding-model-that-matches-fable-5-1-on-frontiercode-at-64-lower-cost/",
+    "https://www.marktechpost.com/2026/09/13/aws-introduces-pizza-bot-an-open-source-inbox-for-background-ai-agents/",
+    "https://www.marktechpost.com/2026/09/13/a-princeton-researcher-proposes-recurrent-looped-transformer-rlt/",
+    "https://www.producthunt.com/products/marqly",
+    "https://www.producthunt.com/products/image-to-ascii-2",
+    "https://www.producthunt.com/products/appdesigns",
+    "https://www.marktechpost.com/2026/09/14/nvidia-open-sources-osmo-one-yaml-orchestrates-physical-ai-training-simulation-and-robot-testing/",
+    "https://www.marktechpost.com/2026/09/13/aws-introduces-pizza-bot-an-open-source-inbox-for-background-ai-agents/",
+    "https://www.producthunt.com/products/marqly",
+    "https://www.producthunt.com/products/image-to-ascii-2",
+    "https://www.producthunt.com/products/appdesigns"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -2685,7 +2698,20 @@
     "Music v2.5",
     "Iris-mini",
     "Iris-pro",
-    "DockFix 5.0"
+    "DockFix 5.0",
+    "قادة الذكاء الاصطناعي يتفقون على ضبط سرعة التطوير وسياسيون أمريكيون يحذرون من التفوق الصيني",
+    "إنفيديا تطلق أداة OSMO مفتوحة المصدر لتنسيق تدريب ومحاكاة الذكاء الاصطناعي الفيزيائي",
+    "Cognition تطلق نموذج SWE-2 لمهام البرمجة بكلفة أقل بنسبة 64%",
+    "AWS تطرح Pizza Bot كأداة مفتوحة المصدر لإدارة مهام وكلاء الذكاء الاصطناعي",
+    "بحث جديد من جامعة برينستون يقترح معمارية RLT لتحسين ذاكرة استجابة النماذج اللغوية",
+    "إطلاق تحديث Marqly 6.0 لإدارة وحفظ العلامات المرجعية",
+    "إطلاق أداة Image to ASCII لتحويل الصور إلى رموز نصية",
+    "إطلاق منصة appdesigns لاستعراض وتصميم واجهات التطبيقات",
+    "NVIDIA OSMO",
+    "Pizza Bot",
+    "Marqly 6.0",
+    "Image to ASCII",
+    "appdesigns"
   ],
-  "lastRunAt": "2026-09-13T19:15:19.521Z"
+  "lastRunAt": "2026-09-14T10:15:27.841Z"
 }
