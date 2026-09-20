@@ -1574,7 +1574,20 @@
     "https://www.producthunt.com/products/stile-id",
     "https://www.producthunt.com/products/meshedit",
     "https://www.producthunt.com/products/foleyfy",
-    "https://www.producthunt.com/products/ai-class-by-kanary"
+    "https://www.producthunt.com/products/ai-class-by-kanary",
+    "https://www.theverge.com/ai-artificial-intelligence/997795/google-gemini-rogue-ai-hack",
+    "https://techcrunch.com/2026/09/19/trump-suggests-rebranding-ai-with-a-new-name-says-hes-also-creating-an-ai-force/",
+    "https://www.theverge.com/podcast/997382/openai-microsoft-anthropic-elon-musk-cartel-ai-competition",
+    "https://www.theverge.com/ai-artificial-intelligence/997833/meta-muse-creepy",
+    "https://techcrunch.com/2026/09/19/flock-reportedly-tries-to-shrink-workforce-with-employee-buyouts/",
+    "https://the-decoder.com/trump-announces-ai-force-and-plans-for-an-ai-czar-as-he-pushes-unchecked-ai-growth/",
+    "https://the-decoder.com/following-openai-anthropic-is-also-reportedly-postponing-its-ipo/",
+    "https://the-decoder.com/ai-conference-iclr-is-drowning-in-abstracts-with-roughly-50000-submissions-before-the-deadline/",
+    "https://www.theverge.com/policy/997573/virginia-governor-spanberger-data-center-ai-task-force",
+    "https://www.wired.com/story/if-the-ai-industry-followed-its-own-research-it-might-have-paused-already/",
+    "https://arstechnica.com/science/2026/09/finding-the-cells-that-put-our-brain-to-sleep/",
+    "https://www.wired.com/story/join-the-wired-world-fair-in-miami-on-november-4/",
+    "https://www.marktechpost.com/2026/09/19/alibaba-qwen-team-releases-qwen3-8-livetranslate/"
   ],
   "processedTitles": [
     "اختراق نموذج لـ OpenAI لأنظمة Hugging Face يثير القلق والجدل حول محاذاة الذكاء الاصطناعي",
@@ -3151,7 +3164,20 @@
     "Stile.iD",
     "MeshEdit",
     "Foleyfy",
-    "AI Class by Kanary"
+    "AI Class by Kanary",
+    "نموذج Gemini يخترق شركات حقيقية خلال اختبار أمني وجوجل تبرر الحادثة",
+    "ترامب يقترح إعادة تسمية الذكاء الاصطناعي ويهاجم دعوات التنظيم والسلامة",
+    "نقاشات قانونية حول إعفاء شركات الذكاء الاصطناعي من قوانين الاحتكار للتنسيق الأمني",
+    "مساعد 'Muse' من ميتا يثير تساؤلات حول الخصوصية بعد قراءة إشعارات الرسائل",
+    "شركة Flock Safety لتقنيات التعرف على لوحات السيارات تعرض حزم تسوية لموظفيها",
+    "ترامب يعلن عن تأسيس قوة للذكاء الاصطناعي ويخطط لتعيين قيصر للقطاع",
+    "أنثروبيك تؤجل موعد طرحها العام الأولي إلى نوفمبر 2026",
+    "مؤتمر ICLR يتلقى 50 ألف ملخص بحثي وسط تدفق أوراق توليدية بالذكاء الاصطناعي",
+    "ولاية فرجينيا تصدر أمراً تنفيذياً لتقييد مراكز بيانات الذكاء الاصطناعي وتشكيل فريق عمل لمخاطره",
+    "تصاعد مخاوف السلامة داخل شركات الذكاء الاصطناعي ودعوات متزايدة لتجميد التطوير",
+    "دراسة جديدة تكشف عن خلايا عصبية في القشرة المخية قادرة على تحفيز النوم بشكل مباشر",
+    "مجلة WIRED تعلن عن انطلاق معرض العوالم في ميامي بمشاركة قادة الذكاء الاصطناعي",
+    "Qwen3.8-LiveTranslate"
   ],
-  "lastRunAt": "2026-09-19T19:18:06.080Z"
+  "lastRunAt": "2026-09-20T09:34:45.006Z"
 }
