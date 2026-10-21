@@ -283,7 +283,7 @@ async function fetchRecentArticles(history) {
 
 // ─── Gemini Summarization (Batched + Model Fallbacks + Backoff) ─────
 async function callGeminiBatchWithFallback(ai, articlesBatch, responseSchema, existingToolNames = []) {
-  const FALLBACK_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
+  const FALLBACK_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
   const MAX_RETRIES_PER_MODEL = 3;
 
   const articlesPrompt = articlesBatch
