@@ -97,6 +97,15 @@ async function validateNews() {
         errors.push({ file: rel, error: `معدل الأهمية خارج النطاق (1-5): ${fm.importance}` });
       }
     }
+
+    // Tag validation
+    if (Array.isArray(fm.tags)) {
+      for (const tag of fm.tags) {
+        if (typeof tag !== 'string' || !tag.trim() || /[/\\:?*"<>|]/.test(tag)) {
+          errors.push({ file: rel, error: `وسم غير صالح أو يحتوي على رموز مسارات محظورة: "${tag}"` });
+        }
+      }
+    }
   }
 
   return { total: files.length, errors };
@@ -154,6 +163,15 @@ async function validateTools() {
         new URL(fm.url);
       } catch {
         errors.push({ file: rel, error: `رابط الأداة غير صالح: "${fm.url}"` });
+      }
+    }
+
+    // Tag validation
+    if (Array.isArray(fm.tags)) {
+      for (const tag of fm.tags) {
+        if (typeof tag !== 'string' || !tag.trim() || /[/\\:?*"<>|]/.test(tag)) {
+          errors.push({ file: rel, error: `وسم غير صالح أو يحتوي على رموز مسارات محظورة: "${tag}"` });
+        }
       }
     }
   }

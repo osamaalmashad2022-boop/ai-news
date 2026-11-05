@@ -26,7 +26,7 @@ const TOOLS_DIR = path.join(process.cwd(), 'src', 'content', 'tools');
 const VALID_PRICING = ['free', 'freemium', 'paid'];
 const LOOKBACK_HOURS = 48;
 const MAX_ARTICLES_PER_FEED = 15;
-const GLOBAL_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes hard limit
+const GLOBAL_TIMEOUT_MS = 25 * 60 * 1000; // 25 minutes hard limit
 
 const parser = new Parser({
   timeout: 15000,
@@ -200,9 +200,9 @@ function validateCategory(category, fallback) {
 async function extractFullText(url) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 4000);
     const article = await extract(url, {
-      timeout: 8000,
+      timeout: 4000,
       signal: controller.signal,
       headers: { 'User-Agent': 'AINewsArabic/2.0' },
     });
@@ -282,8 +282,30 @@ async function fetchRecentArticles(history) {
 }
 
 // ─── Gemini Summarization (Batched + Model Fallbacks + Backoff) ─────
+const FALLBACK_MODELS = [
+  'gemini-3.8-flash',
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.1-flash-lite',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+];
+
+// Track models that have exhausted their quota for the current session to avoid wasting time
+const exhaustedModelsThisSession = new Set();
+
+function sanitizeTag(tag) {
+  if (typeof tag !== 'string') return '';
+  return tag
+    .replace(/[/\\:?*"<>|]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function callGeminiBatchWithFallback(ai, articlesBatch, responseSchema, existingToolNames = []) {
-  const FALLBACK_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
   const MAX_RETRIES_PER_MODEL = 3;
 
   const articlesPrompt = articlesBatch
@@ -306,6 +328,10 @@ ${art.contentSnippet.slice(0, 1500)}
     : '';
 
   for (const model of FALLBACK_MODELS) {
+    if (exhaustedModelsThisSession.has(model)) {
+      continue;
+    }
+
     for (let attempt = 1; attempt <= MAX_RETRIES_PER_MODEL; attempt++) {
       try {
         log('info', `  🤖 محاولة التلخيص عبر ${model} (محاولة ${attempt}/${MAX_RETRIES_PER_MODEL})...`);
@@ -327,23 +353,38 @@ ${art.contentSnippet.slice(0, 1500)}
           tools: parsed.tools || [],
         };
       } catch (err) {
+        const errMsg = err.message || '';
+        const isQuotaExhausted =
+          err.status === 429 &&
+          (errMsg.includes('Quota exceeded') ||
+           errMsg.includes('Free Tier') ||
+           errMsg.includes('RESOURCE_EXHAUSTED') ||
+           errMsg.includes('limit:') ||
+           errMsg.includes('retry in') ||
+           errMsg.includes('quota'));
+
+        if (isQuotaExhausted) {
+          log('warn', `  ⚠️ النموذج ${model} استنفد الحصة اليومية أو حد الطلبات (${errMsg.slice(0, 140)}...). الانتقال للنموذج البديل فوراً...`);
+          exhaustedModelsThisSession.add(model);
+          break; // Break retry loop immediately for this exhausted model
+        }
+
         const isTransient =
           err.status === 503 ||
-          err.status === 429 ||
           err.status === 500 ||
-          err.message?.includes('503') ||
-          err.message?.includes('demand') ||
-          err.message?.includes('quota') ||
-          err.message?.includes('RESOURCE_EXHAUSTED') ||
-          err.message?.includes('UNAVAILABLE');
+          errMsg.includes('503') ||
+          errMsg.includes('500') ||
+          errMsg.includes('demand') ||
+          errMsg.includes('UNAVAILABLE') ||
+          errMsg.includes('fetch failed');
 
         if (attempt < MAX_RETRIES_PER_MODEL && isTransient) {
           const jitter = Math.random() * 1000;
-          const delay = Math.min(2000 * Math.pow(2, attempt - 1) + jitter, 15000);
-          log('warn', `  ⚠️ النموذج ${model} واجه خطأ مؤقت (${err.status || err.message}). إعادة المحاولة بعد ${Math.round(delay)}ms...`);
+          const delay = Math.min(2000 * Math.pow(2, attempt - 1) + jitter, 10000);
+          log('warn', `  ⚠️ النموذج ${model} واجه خطأ مؤقت (${err.status || errMsg.slice(0, 100)}). إعادة المحاولة بعد ${Math.round(delay)}ms...`);
           await new Promise((r) => setTimeout(r, delay));
         } else if (attempt === MAX_RETRIES_PER_MODEL) {
-          log('warn', `  ⚠️ فشل النموذج ${model} بعد ${MAX_RETRIES_PER_MODEL} محاولات: ${err.message}. الانتقال للنموذج البديل...`);
+          log('warn', `  ⚠️ تعذر استخدام النموذج ${model} بعد ${MAX_RETRIES_PER_MODEL} محاولات: ${errMsg.slice(0, 100)}. الانتقال للنموذج البديل...`);
         }
       }
     }
@@ -515,7 +556,7 @@ async function saveNewsFiles(newsList, history) {
 title: ${JSON.stringify(item.title)}
 summary: ${JSON.stringify(item.summary)}
 category: ${JSON.stringify(category)}
-tags: ${JSON.stringify((item.tags || []).map(t => t.replace(/\//g, '-')))}
+tags: ${JSON.stringify((item.tags || []).map(sanitizeTag).filter(Boolean))}
 sourceName: ${JSON.stringify(item.sourceName)}
 sourceUrl: ${JSON.stringify(sourceUrl)}
 publishedAt: ${JSON.stringify(item.publishedAt || new Date().toISOString())}
@@ -592,7 +633,7 @@ description: ${JSON.stringify(tool.description)}
 category: ${JSON.stringify(category)}
 url: ${JSON.stringify(url)}
 pricing: ${JSON.stringify(pricing)}
-tags: ${JSON.stringify((tool.tags || []).map(t => t.replace(/\//g, '-')))}
+tags: ${JSON.stringify((tool.tags || []).map(sanitizeTag).filter(Boolean))}
 addedAt: ${JSON.stringify(new Date().toISOString())}
 ---
 
