@@ -1,13 +1,5 @@
 {
   "processedUrls": [
-    "https://www.marktechpost.com/2026/09/10/sakana-ai-launches-fugu-max-and-fugu-ultra-v2-for-cheaper-stronger-multi-agent-orchestration/",
-    "https://www.marktechpost.com/2026/09/10/meet-redis-langcache-a-managed-semantic-cache-that-cuts-llm-api-costs-by-up-to-90-and-returns-cache-hits-up-to-15x-faster/",
-    "https://www.marktechpost.com/2026/09/10/google-research-releases-toolgrad-answer-first-framework-hits-99-8-pass-rate-for-tool-use-data-generation/",
-    "https://arstechnica.com/tech-policy/2026/09/chatgpt-using-lawyer-punished-for-citing-fake-testimony-from-made-up-witnesses/",
-    "https://arstechnica.com/ai/2026/09/claude-users-found-ways-around-safeguards-for-bioweapons-research/",
-    "https://arstechnica.com/gadgets/2026/09/oracle-promises-2-gw-of-renewables-to-match-stargate-data-center-emissions/",
-    "https://www.wired.com/story/openai-wants-to-know-if-an-ai-industry-slowdown-would-even-be-legal/",
-    "https://www.wired.com/story/why-so-many-ai-researchers-think-the-machines-could-kill-everyone/",
     "https://www.bensbites.com/p/telling-ai-to-design-is-hard",
     "https://openai.com/index/put-data-to-work",
     "https://the-decoder.com/openais-new-agents-api-gives-developers-the-infrastructure-behind-codex-and-chatgpt/",
@@ -1999,17 +1991,17 @@
     "https://www.marktechpost.com/2026/11/08/google-elephant-goldfish-model-plugin-spec-review-coding-agents/",
     "https://www.producthunt.com/products/zigzag-3",
     "https://www.producthunt.com/products/notch-11",
-    "https://www.producthunt.com/products/superlogical"
+    "https://www.producthunt.com/products/superlogical",
+    "https://the-decoder.com/andrej-karpathy-built-a-curated-video-platform-in-a-weekend-using-claude-and-20-years-of-hacker-news/",
+    "https://www.theverge.com/ai-artificial-intelligence/1029552/apple-siri-ai-agentic",
+    "https://www.theverge.com/ai-artificial-intelligence/1029533/elvis-eminem-suno-ai-music-clone-lawsuit",
+    "https://the-decoder.com/the-inventor-of-the-bitter-lesson-has-a-bitter-lesson-for-llm-scaling-enthusiasts/",
+    "https://www.marktechpost.com/2026/11/08/moe-model-routing-comparison/",
+    "https://the-decoder.com/andrej-karpathy-built-a-curated-video-platform-in-a-weekend-using-claude-and-20-years-of-hacker-news/",
+    "https://the-decoder.com/andrej-karpathy-built-a-curated-video-platform-in-a-weekend-using-claude-and-20-years-of-hacker-news/",
+    "https://www.producthunt.com/products/agent-clan"
   ],
   "processedTitles": [
-    "Sakana AI تطلق Fugu Max و Ultra v2 لتنسيق الوكلاء المتعددين بكفاءة أعلى",
-    "Redis تطلق خدمة LangCache لتخزين الاستجابات الدلالية وتخفيض تكاليف LLM",
-    "Google تررع إطار عمل ToolGrad لتوليد بيانات تدريب استخدام الأدوات",
-    "تغريم محامٍ في أمريكا بعد استخدامه ChatGPT لتقديم شهادات وأدلة وهمية أمام المحكمة",
-    "تقرير أمني يكشف اختراق ضوابط Claude لإنتاج أبحاث أسلحة بيولوجية وتصاعد المخاوف حول السلامة",
-    "أوراكل تلتزم بتوفير 2 جيجاوات من الطاقة المتجددة لموازنة انبعاثات مشروع مراكز البيانات Stargate",
-    "أوبن إيه آي تستفسر من الكونغرس عن قانونية إبطاء تطوير الذكاء الاصطناعي",
-    "استقالات متزايدة لباحثين في الذكاء الاصطناعي بسبب مخاوف التحسين الذاتي والأمان",
     "إطلاق أداة Design Words لتسهيل صياغة أوامر التصميم لوكلاء الذكاء الاصطناعي",
     "Data agent",
     "OpenAI Agents API",
@@ -4001,7 +3993,15 @@
     "Elephant-Goldfish Model Plugin",
     "Zigzag Browser",
     "NotchX",
-    "Rex (Beta)"
+    "Rex (Beta)",
+    "أندري كارباتي يبني منصة فيديو ذكية باستخدام Claude وهكر نيوز في عطلة نهاية الأسبوع",
+    "أبل تسابق الزمن لتطوير مساعدها الذكي Siri ليصبح قادراً على التحكم بالوكلاء",
+    "أصحاب حقوق إلفيس بريسلي وإمينيم يقاضون منصة التوليد الموسيقي Suno",
+    "ريتشارد ساتون يحذر من الاعتماد المطلق على الحوسبة وحدها لتحقيق الذكاء الاصطناعي العام",
+    "مقارنة تقنية شاملة لاستراتيجيات التوجيه في نماذج خلط الخبراء (MoE)",
+    "HackerTube",
+    "TristanTube",
+    "Agent Clan"
   ],
-  "lastRunAt": "2026-11-08T11:53:20.772Z"
+  "lastRunAt": "2026-11-08T21:00:16.874Z"
 }
