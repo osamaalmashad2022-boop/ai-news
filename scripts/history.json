@@ -1,8 +1,5 @@
 {
   "processedUrls": [
-    "https://techcrunch.com/2026/09/19/flock-reportedly-tries-to-shrink-workforce-with-employee-buyouts/",
-    "https://the-decoder.com/trump-announces-ai-force-and-plans-for-an-ai-czar-as-he-pushes-unchecked-ai-growth/",
-    "https://the-decoder.com/following-openai-anthropic-is-also-reportedly-postponing-its-ipo/",
     "https://the-decoder.com/ai-conference-iclr-is-drowning-in-abstracts-with-roughly-50000-submissions-before-the-deadline/",
     "https://www.theverge.com/policy/997573/virginia-governor-spanberger-data-center-ai-task-force",
     "https://www.wired.com/story/if-the-ai-industry-followed-its-own-research-it-might-have-paused-already/",
@@ -1999,12 +1996,12 @@
     "https://www.producthunt.com/products/huntmonitor",
     "https://www.producthunt.com/products/remindly-6",
     "https://www.producthunt.com/products/thunder-3",
-    "https://www.producthunt.com/products/tacie"
+    "https://www.producthunt.com/products/tacie",
+    "https://www.theverge.com/ai-artificial-intelligence/1033984/congress-export-rules-ai-chips-china",
+    "https://www.theverge.com/tech/1033968/apples-first-smart-glasses-are-coming-together",
+    "https://the-decoder.com/anthropics-claude-fable-5-2-doesnt-generate-images-it-paints-them/"
   ],
   "processedTitles": [
-    "شركة Flock Safety لتقنيات التعرف على لوحات السيارات تعرض حزم تسوية لموظفيها",
-    "ترامب يعلن عن تأسيس قوة للذكاء الاصطناعي ويخطط لتعيين قيصر للقطاع",
-    "أنثروبيك تؤجل موعد طرحها العام الأولي إلى نوفمبر 2026",
     "مؤتمر ICLR يتلقى 50 ألف ملخص بحثي وسط تدفق أوراق توليدية بالذكاء الاصطناعي",
     "ولاية فرجينيا تصدر أمراً تنفيذياً لتقييد مراكز بيانات الذكاء الاصطناعي وتشكيل فريق عمل لمخاطره",
     "تصاعد مخاوف السلامة داخل شركات الذكاء الاصطناعي ودعوات متزايدة لتجميد التطوير",
@@ -4001,7 +3998,10 @@
     "HuntMonitor",
     "Remindly",
     "Thunder",
-    "Tacie"
+    "Tacie",
+    "تداعيات زلزال إنفيديا: تحركات في الكونغرس لتشديد قيود الرقائق وجدل حول عودة جينسن هوانغ",
+    "تسريبات تكشف خطط أبل لإطلاق أول نظارة ذكية تعتمد على نظام سيري الجديد",
+    "أنثروبيك تستعرض قدرة Claude Fable 5.2 على محاكاة الرسم الواقعي بضربات الفرشاة"
   ],
-  "lastRunAt": "2026-11-15T12:35:42.751Z"
+  "lastRunAt": "2026-11-15T21:34:41.157Z"
 }
